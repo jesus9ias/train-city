@@ -4,6 +4,7 @@
     {
       "id": "straight",
       "name": "Straight",
+      "description": "Straight line. It turns in 45° steps, so it also lays diagonal lines.",
       "cost": 10,
       "routes": [["N", "S"]],
       "sprite": {
@@ -14,6 +15,7 @@
     {
       "id": "curve",
       "name": "Curve",
+      "description": "90° turn between two straight lines.",
       "cost": 12,
       "routes": [["S", "E"]],
       "sprite": {
@@ -24,6 +26,7 @@
     {
       "id": "curve45",
       "name": "45° curve",
+      "description": "45° turn between a straight and a diagonal line. Rotate it to turn left or right.",
       "cost": 12,
       "routes": [["S", "NE"]],
       "sprite": {
@@ -34,6 +37,7 @@
     {
       "id": "cross",
       "name": "X crossing",
+      "description": "Two lines crossing at 90°. Trains on different lines never crash.",
       "cost": 30,
       "routes": [
         ["N", "S"],
@@ -45,8 +49,23 @@
       }
     },
     {
+      "id": "cross45",
+      "name": "45° crossing",
+      "description": "A straight line crossing a diagonal one.",
+      "cost": 30,
+      "routes": [
+        ["N", "S"],
+        ["NE", "SW"]
+      ],
+      "sprite": {
+        "atlas": "tracks",
+        "prefix": "cross45"
+      }
+    },
+    {
       "id": "switch",
-      "name": "Switch",
+      "name": "Switch (right)",
+      "description": "From the trunk, trains go straight or branch right. Click it in Run Mode to flip it.",
       "cost": 40,
       "stateful": true,
       "trunk": "S",
@@ -61,8 +80,26 @@
       }
     },
     {
+      "id": "switch_left",
+      "name": "Switch (left)",
+      "description": "From the trunk, trains go straight or branch left. Click it in Run Mode to flip it.",
+      "cost": 40,
+      "stateful": true,
+      "trunk": "S",
+      "routes": [
+        ["S", "N"],
+        ["S", "W"]
+      ],
+      "defaultState": 0,
+      "sprite": {
+        "atlas": "tracks",
+        "prefix": "switch_left"
+      }
+    },
+    {
       "id": "switch45",
-      "name": "Diagonal switch",
+      "name": "Diagonal switch (right)",
+      "description": "Straight or a 45° branch to the right. Rotate it 45° to branch off a diagonal line.",
       "cost": 45,
       "stateful": true,
       "trunk": "S",
@@ -77,8 +114,26 @@
       }
     },
     {
+      "id": "switch45_left",
+      "name": "Diagonal switch (left)",
+      "description": "Straight or a 45° branch to the left. Rotate it 45° to branch off a diagonal line.",
+      "cost": 45,
+      "stateful": true,
+      "trunk": "S",
+      "routes": [
+        ["S", "N"],
+        ["S", "NW"]
+      ],
+      "defaultState": 0,
+      "sprite": {
+        "atlas": "tracks",
+        "prefix": "switch45_left"
+      }
+    },
+    {
       "id": "wye",
       "name": "Wye",
+      "description": "Splits the line 90° left and right.",
       "cost": 40,
       "stateful": true,
       "trunk": "S",
@@ -93,8 +148,26 @@
       }
     },
     {
+      "id": "wye45",
+      "name": "45° wye",
+      "description": "Splits the line 45° left and right; rotated 45° it splits a diagonal line.",
+      "cost": 45,
+      "stateful": true,
+      "trunk": "S",
+      "routes": [
+        ["S", "NW"],
+        ["S", "NE"]
+      ],
+      "defaultState": 0,
+      "sprite": {
+        "atlas": "tracks",
+        "prefix": "wye45"
+      }
+    },
+    {
       "id": "buffer",
       "name": "Buffer stop",
+      "description": "End of the line: trains stop here, and they never reverse.",
       "cost": 8,
       "routes": [["S", null]],
       "sprite": {
@@ -105,6 +178,7 @@
     {
       "id": "station_track",
       "name": "Platform track",
+      "description": "Straight track for station platforms.",
       "cost": 15,
       "routes": [["N", "S"]],
       "isStation": true,

@@ -7,13 +7,31 @@ import { formatMoney } from './format';
 import { ObjectIcon, TerrainIcon, TrackIcon } from './icons';
 import { TrainBuilder } from './TrainBuilder';
 import { snapRotation } from '../core/track/rotation';
+import type { TrackPieceDef } from '../data/schemas/catalogs';
 import { rotationStepFor } from '../state/selectors';
 
 type Tab = 'tracks' | 'trains' | 'objects' | 'terrain';
 
 type Props = { stores: AppStores; session: ReadySession };
 
-type Item = { tool: Tool; name: string; price: string; icon: ReactNode };
+type Item = {
+  tool: Tool;
+  name: string;
+  price: string;
+  icon: ReactNode;
+  /** Heading the item is listed under (Tracks tab only). */
+  group?: string;
+  description?: string;
+};
+
+/** Track groups, in display order, derived from the piece data (spec.md §4.4). */
+const TRACK_GROUPS = ['Lines & curves', 'Switches & wyes', 'Crossings'] as const;
+
+function trackGroup(piece: TrackPieceDef): (typeof TRACK_GROUPS)[number] {
+  if (piece.stateful) return 'Switches & wyes';
+  if (piece.routes.length > 1) return 'Crossings';
+  return 'Lines & curves';
+}
 
 export function Palette({ stores, session }: Props) {
   const tool = useStore(stores.editor, (s) => s.tool);
@@ -40,11 +58,14 @@ export function Palette({ stores, session }: Props) {
         ? Object.values(catalogs.pieces)
             .filter((p) => rules.allowedPieces?.includes(p.id) ?? true)
             .map((piece) => ({
-              tool: { kind: 'track', piece: piece.id },
+              tool: { kind: 'track' as const, piece: piece.id },
               name: piece.name,
               price: formatMoney(piece.cost),
               icon: <TrackIcon piece={piece} rotation={snapRotation(piece, rotation)} />,
+              group: trackGroup(piece),
+              ...(piece.description ? { description: piece.description } : {}),
             }))
+            .sort((a, b) => TRACK_GROUPS.indexOf(a.group) - TRACK_GROUPS.indexOf(b.group))
         : activeTab === 'objects'
           ? Object.values(catalogs.objects).map((object) => ({
               tool: { kind: 'object', object: object.id },
@@ -58,6 +79,8 @@ export function Palette({ stores, session }: Props) {
               price: 'Free',
               icon: <TerrainIcon terrain={terrain} />,
             }));
+
+  const selected = items.find((item) => sameTool(tool, item.tool));
 
   const toolButton = (label: string, next: Tool, shortcut: string) => (
     <button
@@ -120,24 +143,37 @@ export function Palette({ stores, session }: Props) {
           <TrainBuilder stores={stores} session={session} />
         </div>
       ) : (
-        <ul className="palette__items" role="tabpanel" aria-label={activeTab}>
-          {items.map((item) => (
-            <li key={item.name}>
-              <button
-                type="button"
-                className="palette__item"
-                aria-pressed={sameTool(tool, item.tool)}
-                onClick={() => {
-                  selectTool(sameTool(tool, item.tool) ? null : item.tool);
-                }}
-              >
-                {item.icon}
-                <span className="palette__name">{item.name}</span>
-                <span className="palette__price">{item.price}</span>
-              </button>
-            </li>
+        <div role="tabpanel" aria-label={activeTab} className="palette__panel">
+          {groupsOf(items).map(([group, list]) => (
+            <section key={group ?? 'all'} aria-label={group}>
+              {group && <h3 className="palette__group">{group}</h3>}
+              <ul className="palette__items">
+                {list.map((item) => (
+                  <li key={item.name}>
+                    <button
+                      type="button"
+                      className="palette__item"
+                      aria-pressed={sameTool(tool, item.tool)}
+                      title={item.description}
+                      onClick={() => {
+                        selectTool(sameTool(tool, item.tool) ? null : item.tool);
+                      }}
+                    >
+                      {item.icon}
+                      <span className="palette__name">{item.name}</span>
+                      <span className="palette__price">{item.price}</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </section>
           ))}
-        </ul>
+        </div>
+      )}
+      {selected?.description && (
+        <p className="palette__hint palette__description" data-testid="piece-description">
+          <strong>{selected.name}:</strong> {selected.description}
+        </p>
       )}
       {activeTab === 'tracks' && (
         <p className="palette__hint palette__rotation">
@@ -157,4 +193,11 @@ export function Palette({ stores, session }: Props) {
       )}
     </aside>
   );
+}
+
+/** Items split by group, keeping their order; ungrouped items form one unnamed group. */
+function groupsOf(items: readonly Item[]): [string | undefined, Item[]][] {
+  const groups = new Map<string | undefined, Item[]>();
+  for (const item of items) groups.set(item.group, [...(groups.get(item.group) ?? []), item]);
+  return [...groups];
 }

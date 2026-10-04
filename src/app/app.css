@@ -843,3 +843,33 @@ body {
 .app--compact .drawer > .side-panel {
   padding-top: 56px;
 }
+
+.palette__panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.palette__group {
+  margin: 0 0 4px;
+  color: var(--text-muted);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.palette__description strong {
+  color: var(--text);
+}
+
+.map-controls__label {
+  display: flex;
+  flex-direction: column;
+  max-width: min(60vw, 320px);
+}
+
+.map-controls__hint {
+  color: var(--text-muted);
+  font-size: 11px;
+  line-height: 1.3;
+}
