@@ -1,0 +1,1409 @@
+{
+  "format": "traincity-save",
+  "schemaVersion": 3,
+  "gameVersion": "0.5.0",
+  "savedAt": "2026-10-04T10:00:00.000Z",
+  "levelId": "level-001",
+  "levelHash": "fnv1a:b9a9b59d",
+  "mode": "running",
+  "world": {
+    "widthPx": 1000,
+    "heightPx": 1000,
+    "terrain": [
+      ["snow", 14],
+      ["grass", 16],
+      ["desert", 20],
+      ["snow", 14],
+      ["grass", 16],
+      ["desert", 20],
+      ["snow", 14],
+      ["grass", 16],
+      ["desert", 20],
+      ["snow", 14],
+      ["grass", 16],
+      ["desert", 20],
+      ["snow", 14],
+      ["grass", 16],
+      ["desert", 20],
+      ["snow", 14],
+      ["grass", 16],
+      ["desert", 20],
+      ["grass", 30],
+      ["desert", 20],
+      ["grass", 8],
+      ["dirt", 6],
+      ["grass", 16],
+      ["desert", 20],
+      ["grass", 8],
+      ["dirt", 6],
+      ["grass", 16],
+      ["desert", 20],
+      ["grass", 8],
+      ["dirt", 6],
+      ["grass", 16],
+      ["desert", 20],
+      ["grass", 8],
+      ["dirt", 6],
+      ["grass", 16],
+      ["desert", 20],
+      ["grass", 8],
+      ["dirt", 6],
+      ["grass", 16],
+      ["desert", 20],
+      ["grass", 8],
+      ["dirt", 6],
+      ["grass", 16],
+      ["desert", 20],
+      ["grass", 30],
+      ["desert", 20],
+      ["grass", 30],
+      ["desert", 20],
+      ["grass", 30],
+      ["desert", 20],
+      ["grass", 30],
+      ["desert", 20],
+      ["grass", 30],
+      ["desert", 20],
+      ["grass", 30],
+      ["desert", 20],
+      ["grass", 30],
+      ["desert", 20],
+      ["grass", 30],
+      ["desert", 20],
+      ["grass", 30],
+      ["desert", 20],
+      ["grass", 30],
+      ["desert", 20],
+      ["grass", 30],
+      ["desert", 20],
+      ["grass", 30],
+      ["desert", 20],
+      ["grass", 30],
+      ["desert", 20],
+      ["grass", 30],
+      ["desert", 20],
+      ["grass", 30],
+      ["desert", 20],
+      ["grass", 18],
+      ["water", 6],
+      ["grass", 6],
+      ["desert", 20],
+      ["grass", 18],
+      ["water", 6],
+      ["grass", 6],
+      ["desert", 20],
+      ["grass", 18],
+      ["water", 6],
+      ["grass", 6],
+      ["desert", 20],
+      ["grass", 18],
+      ["water", 6],
+      ["grass", 6],
+      ["desert", 20],
+      ["grass", 30],
+      ["desert", 20],
+      ["grass", 30],
+      ["desert", 20],
+      ["grass", 30],
+      ["desert", 20],
+      ["grass", 30],
+      ["desert", 20],
+      ["grass", 30],
+      ["desert", 20],
+      ["grass", 30],
+      ["desert", 20],
+      ["grass", 30],
+      ["desert", 20],
+      ["grass", 30],
+      ["desert", 20],
+      ["grass", 30],
+      ["desert", 20],
+      ["grass", 30],
+      ["desert", 20],
+      ["grass", 30],
+      ["desert", 20],
+      ["grass", 30],
+      ["desert", 20],
+      ["grass", 30],
+      ["desert", 20],
+      ["grass", 30],
+      ["desert", 20],
+      ["grass", 30],
+      ["desert", 20],
+      ["grass", 30],
+      ["desert", 20],
+      ["grass", 30],
+      ["desert", 20],
+      ["grass", 30],
+      ["desert", 20]
+    ],
+    "objects": [
+      {
+        "id": "obj-1",
+        "type": "mine",
+        "at": {
+          "x": 11,
+          "y": 8
+        },
+        "locked": true,
+        "placedInSession": null
+      },
+      {
+        "id": "obj-2",
+        "type": "power_plant",
+        "at": {
+          "x": 40,
+          "y": 39
+        },
+        "locked": true,
+        "placedInSession": null
+      },
+      {
+        "id": "obj-3",
+        "type": "house_s",
+        "at": {
+          "x": 20,
+          "y": 20
+        },
+        "locked": true,
+        "placedInSession": null
+      },
+      {
+        "id": "obj-4",
+        "type": "house_s",
+        "at": {
+          "x": 24,
+          "y": 22
+        },
+        "locked": true,
+        "placedInSession": null
+      },
+      {
+        "id": "obj-5",
+        "type": "house_s",
+        "at": {
+          "x": 26,
+          "y": 18
+        },
+        "locked": true,
+        "placedInSession": null
+      },
+      {
+        "id": "obj-6",
+        "type": "tree_pine",
+        "at": {
+          "x": 12,
+          "y": 7
+        },
+        "locked": false,
+        "placedInSession": null
+      },
+      {
+        "id": "obj-7",
+        "type": "tree_pine",
+        "at": {
+          "x": 5,
+          "y": 2
+        },
+        "locked": false,
+        "placedInSession": null
+      },
+      {
+        "id": "obj-8",
+        "type": "tree_pine",
+        "at": {
+          "x": 8,
+          "y": 3
+        },
+        "locked": false,
+        "placedInSession": null
+      },
+      {
+        "id": "obj-9",
+        "type": "tree_pine",
+        "at": {
+          "x": 3,
+          "y": 4
+        },
+        "locked": false,
+        "placedInSession": null
+      },
+      {
+        "id": "obj-10",
+        "type": "tree_pine",
+        "at": {
+          "x": 15,
+          "y": 12
+        },
+        "locked": false,
+        "placedInSession": null
+      },
+      {
+        "id": "obj-11",
+        "type": "tree_pine",
+        "at": {
+          "x": 16,
+          "y": 14
+        },
+        "locked": false,
+        "placedInSession": null
+      },
+      {
+        "id": "obj-12",
+        "type": "tree_pine",
+        "at": {
+          "x": 6,
+          "y": 20
+        },
+        "locked": false,
+        "placedInSession": null
+      },
+      {
+        "id": "obj-13",
+        "type": "tree_pine",
+        "at": {
+          "x": 7,
+          "y": 22
+        },
+        "locked": false,
+        "placedInSession": null
+      },
+      {
+        "id": "obj-14",
+        "type": "tree_pine",
+        "at": {
+          "x": 5,
+          "y": 25
+        },
+        "locked": false,
+        "placedInSession": null
+      },
+      {
+        "id": "obj-15",
+        "type": "tree_pine",
+        "at": {
+          "x": 12,
+          "y": 30
+        },
+        "locked": false,
+        "placedInSession": null
+      },
+      {
+        "id": "obj-16",
+        "type": "tree_pine",
+        "at": {
+          "x": 14,
+          "y": 33
+        },
+        "locked": false,
+        "placedInSession": null
+      },
+      {
+        "id": "obj-17",
+        "type": "tree_pine",
+        "at": {
+          "x": 26,
+          "y": 8
+        },
+        "locked": false,
+        "placedInSession": null
+      },
+      {
+        "id": "obj-18",
+        "type": "tree_pine",
+        "at": {
+          "x": 27,
+          "y": 10
+        },
+        "locked": false,
+        "placedInSession": null
+      },
+      {
+        "id": "obj-19",
+        "type": "tree_pine",
+        "at": {
+          "x": 22,
+          "y": 40
+        },
+        "locked": false,
+        "placedInSession": null
+      },
+      {
+        "id": "obj-20",
+        "type": "tree_pine",
+        "at": {
+          "x": 25,
+          "y": 44
+        },
+        "locked": false,
+        "placedInSession": null
+      },
+      {
+        "id": "obj-21",
+        "type": "tree_pine",
+        "at": {
+          "x": 18,
+          "y": 45
+        },
+        "locked": false,
+        "placedInSession": null
+      },
+      {
+        "id": "obj-22",
+        "type": "tree_pine",
+        "at": {
+          "x": 10,
+          "y": 40
+        },
+        "locked": false,
+        "placedInSession": null
+      },
+      {
+        "id": "obj-23",
+        "type": "tree_oak",
+        "at": {
+          "x": 14,
+          "y": 20
+        },
+        "locked": false,
+        "placedInSession": null
+      },
+      {
+        "id": "obj-24",
+        "type": "tree_oak",
+        "at": {
+          "x": 15,
+          "y": 21
+        },
+        "locked": false,
+        "placedInSession": null
+      },
+      {
+        "id": "obj-25",
+        "type": "tree_oak",
+        "at": {
+          "x": 9,
+          "y": 35
+        },
+        "locked": false,
+        "placedInSession": null
+      },
+      {
+        "id": "obj-26",
+        "type": "tree_oak",
+        "at": {
+          "x": 28,
+          "y": 36
+        },
+        "locked": false,
+        "placedInSession": null
+      },
+      {
+        "id": "obj-27",
+        "type": "cactus",
+        "at": {
+          "x": 33,
+          "y": 5
+        },
+        "locked": false,
+        "placedInSession": null
+      },
+      {
+        "id": "obj-28",
+        "type": "cactus",
+        "at": {
+          "x": 36,
+          "y": 12
+        },
+        "locked": false,
+        "placedInSession": null
+      },
+      {
+        "id": "obj-29",
+        "type": "cactus",
+        "at": {
+          "x": 45,
+          "y": 20
+        },
+        "locked": false,
+        "placedInSession": null
+      },
+      {
+        "id": "obj-30",
+        "type": "cactus",
+        "at": {
+          "x": 38,
+          "y": 30
+        },
+        "locked": false,
+        "placedInSession": null
+      },
+      {
+        "id": "obj-31",
+        "type": "cactus",
+        "at": {
+          "x": 47,
+          "y": 45
+        },
+        "locked": false,
+        "placedInSession": null
+      },
+      {
+        "id": "obj-32",
+        "type": "cactus",
+        "at": {
+          "x": 32,
+          "y": 25
+        },
+        "locked": false,
+        "placedInSession": null
+      },
+      {
+        "id": "obj-33",
+        "type": "rock",
+        "at": {
+          "x": 31,
+          "y": 15
+        },
+        "locked": false,
+        "placedInSession": null
+      },
+      {
+        "id": "obj-34",
+        "type": "rock",
+        "at": {
+          "x": 44,
+          "y": 8
+        },
+        "locked": false,
+        "placedInSession": null
+      },
+      {
+        "id": "obj-35",
+        "type": "rock",
+        "at": {
+          "x": 35,
+          "y": 33
+        },
+        "locked": false,
+        "placedInSession": null
+      },
+      {
+        "id": "obj-36",
+        "type": "rock",
+        "at": {
+          "x": 16,
+          "y": 3
+        },
+        "locked": false,
+        "placedInSession": null
+      }
+    ],
+    "tracks": [
+      {
+        "at": {
+          "x": 10,
+          "y": 8
+        },
+        "piece": "station_track",
+        "rotation": 0,
+        "state": 0,
+        "locked": true,
+        "paid": 0,
+        "placedInSession": null
+      },
+      {
+        "at": {
+          "x": 10,
+          "y": 9
+        },
+        "piece": "station_track",
+        "rotation": 0,
+        "state": 0,
+        "locked": true,
+        "paid": 0,
+        "placedInSession": null
+      },
+      {
+        "at": {
+          "x": 10,
+          "y": 10
+        },
+        "piece": "station_track",
+        "rotation": 0,
+        "state": 0,
+        "locked": true,
+        "paid": 0,
+        "placedInSession": null
+      },
+      {
+        "at": {
+          "x": 40,
+          "y": 38
+        },
+        "piece": "station_track",
+        "rotation": 90,
+        "state": 0,
+        "locked": true,
+        "paid": 0,
+        "placedInSession": null
+      },
+      {
+        "at": {
+          "x": 41,
+          "y": 38
+        },
+        "piece": "station_track",
+        "rotation": 90,
+        "state": 0,
+        "locked": true,
+        "paid": 0,
+        "placedInSession": null
+      },
+      {
+        "at": {
+          "x": 42,
+          "y": 38
+        },
+        "piece": "station_track",
+        "rotation": 90,
+        "state": 0,
+        "locked": true,
+        "paid": 0,
+        "placedInSession": null
+      },
+      {
+        "at": {
+          "x": 10,
+          "y": 11
+        },
+        "piece": "straight",
+        "rotation": 0,
+        "state": 0,
+        "locked": false,
+        "paid": 10,
+        "placedInSession": 1
+      },
+      {
+        "at": {
+          "x": 10,
+          "y": 12
+        },
+        "piece": "straight",
+        "rotation": 0,
+        "state": 0,
+        "locked": false,
+        "paid": 10,
+        "placedInSession": 1
+      },
+      {
+        "at": {
+          "x": 10,
+          "y": 13
+        },
+        "piece": "straight",
+        "rotation": 0,
+        "state": 0,
+        "locked": false,
+        "paid": 10,
+        "placedInSession": 1
+      },
+      {
+        "at": {
+          "x": 10,
+          "y": 14
+        },
+        "piece": "straight",
+        "rotation": 0,
+        "state": 0,
+        "locked": false,
+        "paid": 10,
+        "placedInSession": 1
+      },
+      {
+        "at": {
+          "x": 10,
+          "y": 15
+        },
+        "piece": "straight",
+        "rotation": 0,
+        "state": 0,
+        "locked": false,
+        "paid": 10,
+        "placedInSession": 1
+      },
+      {
+        "at": {
+          "x": 10,
+          "y": 16
+        },
+        "piece": "straight",
+        "rotation": 0,
+        "state": 0,
+        "locked": false,
+        "paid": 10,
+        "placedInSession": 1
+      },
+      {
+        "at": {
+          "x": 10,
+          "y": 17
+        },
+        "piece": "straight",
+        "rotation": 0,
+        "state": 0,
+        "locked": false,
+        "paid": 10,
+        "placedInSession": 1
+      },
+      {
+        "at": {
+          "x": 10,
+          "y": 18
+        },
+        "piece": "straight",
+        "rotation": 0,
+        "state": 0,
+        "locked": false,
+        "paid": 10,
+        "placedInSession": 1
+      },
+      {
+        "at": {
+          "x": 10,
+          "y": 19
+        },
+        "piece": "straight",
+        "rotation": 0,
+        "state": 0,
+        "locked": false,
+        "paid": 10,
+        "placedInSession": 1
+      },
+      {
+        "at": {
+          "x": 10,
+          "y": 20
+        },
+        "piece": "straight",
+        "rotation": 0,
+        "state": 0,
+        "locked": false,
+        "paid": 10,
+        "placedInSession": 1
+      },
+      {
+        "at": {
+          "x": 10,
+          "y": 21
+        },
+        "piece": "straight",
+        "rotation": 0,
+        "state": 0,
+        "locked": false,
+        "paid": 10,
+        "placedInSession": 1
+      },
+      {
+        "at": {
+          "x": 10,
+          "y": 22
+        },
+        "piece": "straight",
+        "rotation": 0,
+        "state": 0,
+        "locked": false,
+        "paid": 10,
+        "placedInSession": 1
+      },
+      {
+        "at": {
+          "x": 10,
+          "y": 23
+        },
+        "piece": "straight",
+        "rotation": 0,
+        "state": 0,
+        "locked": false,
+        "paid": 10,
+        "placedInSession": 1
+      },
+      {
+        "at": {
+          "x": 10,
+          "y": 24
+        },
+        "piece": "straight",
+        "rotation": 0,
+        "state": 0,
+        "locked": false,
+        "paid": 10,
+        "placedInSession": 1
+      },
+      {
+        "at": {
+          "x": 10,
+          "y": 25
+        },
+        "piece": "straight",
+        "rotation": 0,
+        "state": 0,
+        "locked": false,
+        "paid": 10,
+        "placedInSession": 1
+      },
+      {
+        "at": {
+          "x": 10,
+          "y": 26
+        },
+        "piece": "straight",
+        "rotation": 0,
+        "state": 0,
+        "locked": false,
+        "paid": 10,
+        "placedInSession": 1
+      },
+      {
+        "at": {
+          "x": 10,
+          "y": 27
+        },
+        "piece": "straight",
+        "rotation": 0,
+        "state": 0,
+        "locked": false,
+        "paid": 10,
+        "placedInSession": 1
+      },
+      {
+        "at": {
+          "x": 10,
+          "y": 28
+        },
+        "piece": "straight",
+        "rotation": 0,
+        "state": 0,
+        "locked": false,
+        "paid": 10,
+        "placedInSession": 1
+      },
+      {
+        "at": {
+          "x": 10,
+          "y": 29
+        },
+        "piece": "straight",
+        "rotation": 0,
+        "state": 0,
+        "locked": false,
+        "paid": 10,
+        "placedInSession": 1
+      },
+      {
+        "at": {
+          "x": 10,
+          "y": 30
+        },
+        "piece": "straight",
+        "rotation": 0,
+        "state": 0,
+        "locked": false,
+        "paid": 10,
+        "placedInSession": 1
+      },
+      {
+        "at": {
+          "x": 10,
+          "y": 31
+        },
+        "piece": "straight",
+        "rotation": 0,
+        "state": 0,
+        "locked": false,
+        "paid": 10,
+        "placedInSession": 1
+      },
+      {
+        "at": {
+          "x": 10,
+          "y": 32
+        },
+        "piece": "straight",
+        "rotation": 0,
+        "state": 0,
+        "locked": false,
+        "paid": 10,
+        "placedInSession": 1
+      },
+      {
+        "at": {
+          "x": 10,
+          "y": 33
+        },
+        "piece": "straight",
+        "rotation": 0,
+        "state": 0,
+        "locked": false,
+        "paid": 10,
+        "placedInSession": 1
+      },
+      {
+        "at": {
+          "x": 10,
+          "y": 34
+        },
+        "piece": "straight",
+        "rotation": 0,
+        "state": 0,
+        "locked": false,
+        "paid": 10,
+        "placedInSession": 1
+      },
+      {
+        "at": {
+          "x": 10,
+          "y": 35
+        },
+        "piece": "straight",
+        "rotation": 0,
+        "state": 0,
+        "locked": false,
+        "paid": 10,
+        "placedInSession": 1
+      },
+      {
+        "at": {
+          "x": 10,
+          "y": 36
+        },
+        "piece": "straight",
+        "rotation": 0,
+        "state": 0,
+        "locked": false,
+        "paid": 10,
+        "placedInSession": 1
+      },
+      {
+        "at": {
+          "x": 10,
+          "y": 37
+        },
+        "piece": "straight",
+        "rotation": 0,
+        "state": 0,
+        "locked": false,
+        "paid": 10,
+        "placedInSession": 1
+      },
+      {
+        "at": {
+          "x": 10,
+          "y": 38
+        },
+        "piece": "curve",
+        "rotation": 270,
+        "state": 0,
+        "locked": false,
+        "paid": 12,
+        "placedInSession": 1
+      },
+      {
+        "at": {
+          "x": 11,
+          "y": 38
+        },
+        "piece": "straight",
+        "rotation": 90,
+        "state": 0,
+        "locked": false,
+        "paid": 10,
+        "placedInSession": 1
+      },
+      {
+        "at": {
+          "x": 12,
+          "y": 38
+        },
+        "piece": "straight",
+        "rotation": 90,
+        "state": 0,
+        "locked": false,
+        "paid": 10,
+        "placedInSession": 1
+      },
+      {
+        "at": {
+          "x": 13,
+          "y": 38
+        },
+        "piece": "straight",
+        "rotation": 90,
+        "state": 0,
+        "locked": false,
+        "paid": 10,
+        "placedInSession": 1
+      },
+      {
+        "at": {
+          "x": 14,
+          "y": 38
+        },
+        "piece": "straight",
+        "rotation": 90,
+        "state": 0,
+        "locked": false,
+        "paid": 10,
+        "placedInSession": 1
+      },
+      {
+        "at": {
+          "x": 15,
+          "y": 38
+        },
+        "piece": "straight",
+        "rotation": 90,
+        "state": 0,
+        "locked": false,
+        "paid": 10,
+        "placedInSession": 1
+      },
+      {
+        "at": {
+          "x": 16,
+          "y": 38
+        },
+        "piece": "straight",
+        "rotation": 90,
+        "state": 0,
+        "locked": false,
+        "paid": 10,
+        "placedInSession": 1
+      },
+      {
+        "at": {
+          "x": 17,
+          "y": 38
+        },
+        "piece": "straight",
+        "rotation": 90,
+        "state": 0,
+        "locked": false,
+        "paid": 10,
+        "placedInSession": 1
+      },
+      {
+        "at": {
+          "x": 18,
+          "y": 38
+        },
+        "piece": "straight",
+        "rotation": 90,
+        "state": 0,
+        "locked": false,
+        "paid": 10,
+        "placedInSession": 1
+      },
+      {
+        "at": {
+          "x": 19,
+          "y": 38
+        },
+        "piece": "straight",
+        "rotation": 90,
+        "state": 0,
+        "locked": false,
+        "paid": 10,
+        "placedInSession": 1
+      },
+      {
+        "at": {
+          "x": 20,
+          "y": 38
+        },
+        "piece": "straight",
+        "rotation": 90,
+        "state": 0,
+        "locked": false,
+        "paid": 10,
+        "placedInSession": 1
+      },
+      {
+        "at": {
+          "x": 21,
+          "y": 38
+        },
+        "piece": "straight",
+        "rotation": 90,
+        "state": 0,
+        "locked": false,
+        "paid": 10,
+        "placedInSession": 1
+      },
+      {
+        "at": {
+          "x": 22,
+          "y": 38
+        },
+        "piece": "straight",
+        "rotation": 90,
+        "state": 0,
+        "locked": false,
+        "paid": 10,
+        "placedInSession": 1
+      },
+      {
+        "at": {
+          "x": 23,
+          "y": 38
+        },
+        "piece": "straight",
+        "rotation": 90,
+        "state": 0,
+        "locked": false,
+        "paid": 10,
+        "placedInSession": 1
+      },
+      {
+        "at": {
+          "x": 24,
+          "y": 38
+        },
+        "piece": "straight",
+        "rotation": 90,
+        "state": 0,
+        "locked": false,
+        "paid": 10,
+        "placedInSession": 1
+      },
+      {
+        "at": {
+          "x": 25,
+          "y": 38
+        },
+        "piece": "straight",
+        "rotation": 90,
+        "state": 0,
+        "locked": false,
+        "paid": 10,
+        "placedInSession": 1
+      },
+      {
+        "at": {
+          "x": 26,
+          "y": 38
+        },
+        "piece": "straight",
+        "rotation": 90,
+        "state": 0,
+        "locked": false,
+        "paid": 10,
+        "placedInSession": 1
+      },
+      {
+        "at": {
+          "x": 27,
+          "y": 38
+        },
+        "piece": "straight",
+        "rotation": 90,
+        "state": 0,
+        "locked": false,
+        "paid": 10,
+        "placedInSession": 1
+      },
+      {
+        "at": {
+          "x": 28,
+          "y": 38
+        },
+        "piece": "straight",
+        "rotation": 90,
+        "state": 0,
+        "locked": false,
+        "paid": 10,
+        "placedInSession": 1
+      },
+      {
+        "at": {
+          "x": 29,
+          "y": 38
+        },
+        "piece": "straight",
+        "rotation": 90,
+        "state": 0,
+        "locked": false,
+        "paid": 10,
+        "placedInSession": 1
+      },
+      {
+        "at": {
+          "x": 30,
+          "y": 38
+        },
+        "piece": "straight",
+        "rotation": 90,
+        "state": 0,
+        "locked": false,
+        "paid": 12,
+        "placedInSession": 1
+      },
+      {
+        "at": {
+          "x": 31,
+          "y": 38
+        },
+        "piece": "straight",
+        "rotation": 90,
+        "state": 0,
+        "locked": false,
+        "paid": 12,
+        "placedInSession": 1
+      },
+      {
+        "at": {
+          "x": 32,
+          "y": 38
+        },
+        "piece": "straight",
+        "rotation": 90,
+        "state": 0,
+        "locked": false,
+        "paid": 12,
+        "placedInSession": 1
+      },
+      {
+        "at": {
+          "x": 33,
+          "y": 38
+        },
+        "piece": "straight",
+        "rotation": 90,
+        "state": 0,
+        "locked": false,
+        "paid": 12,
+        "placedInSession": 1
+      },
+      {
+        "at": {
+          "x": 34,
+          "y": 38
+        },
+        "piece": "straight",
+        "rotation": 90,
+        "state": 0,
+        "locked": false,
+        "paid": 12,
+        "placedInSession": 1
+      },
+      {
+        "at": {
+          "x": 35,
+          "y": 38
+        },
+        "piece": "straight",
+        "rotation": 90,
+        "state": 0,
+        "locked": false,
+        "paid": 12,
+        "placedInSession": 1
+      },
+      {
+        "at": {
+          "x": 36,
+          "y": 38
+        },
+        "piece": "straight",
+        "rotation": 90,
+        "state": 0,
+        "locked": false,
+        "paid": 12,
+        "placedInSession": 1
+      },
+      {
+        "at": {
+          "x": 37,
+          "y": 38
+        },
+        "piece": "straight",
+        "rotation": 90,
+        "state": 0,
+        "locked": false,
+        "paid": 12,
+        "placedInSession": 1
+      },
+      {
+        "at": {
+          "x": 38,
+          "y": 38
+        },
+        "piece": "straight",
+        "rotation": 90,
+        "state": 0,
+        "locked": false,
+        "paid": 12,
+        "placedInSession": 1
+      },
+      {
+        "at": {
+          "x": 39,
+          "y": 38
+        },
+        "piece": "straight",
+        "rotation": 90,
+        "state": 0,
+        "locked": false,
+        "paid": 12,
+        "placedInSession": 1
+      }
+    ],
+    "stations": [
+      {
+        "id": "st_A",
+        "name": "North Mine",
+        "cells": [
+          {
+            "x": 10,
+            "y": 8
+          },
+          {
+            "x": 10,
+            "y": 9
+          },
+          {
+            "x": 10,
+            "y": 10
+          }
+        ],
+        "supplies": [
+          {
+            "cargo": "coal",
+            "ratePerMinute": 10,
+            "capacity": 100,
+            "initial": 50
+          }
+        ],
+        "demands": [],
+        "services": ["fuel"],
+        "dwellSeconds": 3,
+        "locked": true
+      },
+      {
+        "id": "st_B",
+        "name": "Power Plant",
+        "cells": [
+          {
+            "x": 40,
+            "y": 38
+          },
+          {
+            "x": 41,
+            "y": 38
+          },
+          {
+            "x": 42,
+            "y": 38
+          }
+        ],
+        "supplies": [],
+        "demands": [
+          {
+            "cargo": "coal"
+          }
+        ],
+        "services": [],
+        "dwellSeconds": 3,
+        "locked": true
+      }
+    ],
+    "trains": [
+      {
+        "id": "t1",
+        "locomotive": "loco_steam",
+        "wagons": [
+          {
+            "model": "wagon_hopper",
+            "cargo": "coal",
+            "amount": 30
+          },
+          {
+            "model": "wagon_hopper",
+            "cargo": "coal",
+            "amount": 20
+          }
+        ],
+        "head": {
+          "cell": {
+            "x": 10,
+            "y": 30
+          },
+          "entry": "N",
+          "exit": "S"
+        },
+        "trail": [
+          {
+            "cell": {
+              "x": 10,
+              "y": 29
+            },
+            "entry": "N",
+            "exit": "S"
+          },
+          {
+            "cell": {
+              "x": 10,
+              "y": 28
+            },
+            "entry": "N",
+            "exit": "S"
+          }
+        ],
+        "progress": 0.44999999999999596,
+        "speed": 2,
+        "running": true,
+        "status": "running",
+        "fuel": 455.01359999999596,
+        "autoRefuel": true,
+        "dwellRemaining": 0,
+        "lastStation": null,
+        "purchaseValue": 440,
+        "paid": 690,
+        "placedInSession": 1
+      }
+    ]
+  },
+  "run": {
+    "elapsedTicks": 300,
+    "paused": false,
+    "inventories": {
+      "st_A": {
+        "coal": 2.499999999999994
+      },
+      "st_B": {}
+    },
+    "delivered": {},
+    "lost": {},
+    "fuelUsedTotal": 44.98889999999997,
+    "fuelUsedByTrain": {
+      "t1": 44.98889999999997
+    },
+    "fuelBoughtTotal": 0.0024999999999977263,
+    "outcome": null
+  },
+  "economy": {
+    "initialMoney": 2500,
+    "ledger": {
+      "build": 592,
+      "objects": 0,
+      "trains": 440,
+      "fuel": 250,
+      "revenue": 0,
+      "refunds": 0
+    }
+  },
+  "editor": {
+    "session": 2,
+    "nextObjectId": 37,
+    "nextTrainId": 2
+  }
+}

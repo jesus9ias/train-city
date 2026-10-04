@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "levels": [
+    {
+      "id": "level-001",
+      "name": "First Run",
+      "unlocked": true
+    },
+    {
+      "id": "level-002",
+      "name": "Round Trip",
+      "unlocked": false
+    },
+    {
+      "id": "level-003",
+      "name": "Dead End Port",
+      "unlocked": false
+    },
+    {
+      "id": "sandbox",
+      "name": "Sandbox",
+      "unlocked": true
+    }
+  ]
+}

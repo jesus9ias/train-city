@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "id": "level-002",
+  "name": "Round Trip",
+  "description": "Trains never reverse: build a loop around the lake so passengers can travel both ways.",
+  "map": {
+    "widthPx": 1000,
+    "heightPx": 1000,
+    "defaultTerrain": "grass",
+    "terrainPatches": [
+      { "terrain": "water", "rect": { "x": 14, "y": 14, "w": 22, "h": 15 } },
+      { "terrain": "dirt", "rect": { "x": 3, "y": 17, "w": 4, "h": 9 } },
+      { "terrain": "dirt", "rect": { "x": 43, "y": 17, "w": 4, "h": 9 } }
+    ],
+    "objects": [
+      { "type": "house_s", "at": { "x": 4, "y": 18 }, "locked": true },
+      { "type": "house_s", "at": { "x": 4, "y": 23 }, "locked": true },
+      { "type": "house_s", "at": { "x": 44, "y": 18 }, "locked": true },
+      { "type": "house_s", "at": { "x": 44, "y": 23 }, "locked": true },
+      { "type": "tree_pine", "at": { "x": 3, "y": 5 } },
+      { "type": "tree_oak", "at": { "x": 6, "y": 3 } },
+      { "type": "tree_pine", "at": { "x": 12, "y": 4 } },
+      { "type": "tree_oak", "at": { "x": 20, "y": 6 } },
+      { "type": "tree_pine", "at": { "x": 30, "y": 3 } },
+      { "type": "tree_oak", "at": { "x": 38, "y": 5 } },
+      { "type": "tree_pine", "at": { "x": 45, "y": 8 } },
+      { "type": "tree_oak", "at": { "x": 47, "y": 14 } },
+      { "type": "tree_pine", "at": { "x": 46, "y": 30 } },
+      { "type": "tree_oak", "at": { "x": 44, "y": 38 } },
+      { "type": "tree_pine", "at": { "x": 36, "y": 40 } },
+      { "type": "tree_oak", "at": { "x": 25, "y": 42 } },
+      { "type": "tree_pine", "at": { "x": 15, "y": 40 } },
+      { "type": "tree_oak", "at": { "x": 5, "y": 38 } },
+      { "type": "tree_pine", "at": { "x": 3, "y": 30 } },
+      { "type": "tree_oak", "at": { "x": 2, "y": 12 } },
+      { "type": "tree_pine", "at": { "x": 25, "y": 36 } },
+      { "type": "tree_oak", "at": { "x": 30, "y": 37 } }
+    ],
+    "tracks": [
+      { "at": { "x": 8, "y": 20 }, "piece": "station_track", "rotation": 0, "locked": true },
+      { "at": { "x": 8, "y": 21 }, "piece": "station_track", "rotation": 0, "locked": true },
+      { "at": { "x": 8, "y": 22 }, "piece": "station_track", "rotation": 0, "locked": true },
+      { "at": { "x": 41, "y": 20 }, "piece": "station_track", "rotation": 0, "locked": true },
+      { "at": { "x": 41, "y": 21 }, "piece": "station_track", "rotation": 0, "locked": true },
+      { "at": { "x": 41, "y": 22 }, "piece": "station_track", "rotation": 0, "locked": true }
+    ],
+    "stations": [
+      {
+        "id": "st_west",
+        "name": "Westbrook",
+        "cells": [
+          { "x": 8, "y": 20 },
+          { "x": 8, "y": 21 },
+          { "x": 8, "y": 22 }
+        ],
+        "supplies": [
+          { "cargo": "passengers", "ratePerMinute": 20, "capacity": 120, "initial": 40 }
+        ],
+        "demands": [{ "cargo": "passengers" }],
+        "services": ["fuel"],
+        "dwellSeconds": 3,
+        "locked": true
+      },
+      {
+        "id": "st_east",
+        "name": "Eastport",
+        "cells": [
+          { "x": 41, "y": 20 },
+          { "x": 41, "y": 21 },
+          { "x": 41, "y": 22 }
+        ],
+        "supplies": [
+          { "cargo": "passengers", "ratePerMinute": 20, "capacity": 120, "initial": 40 }
+        ],
+        "demands": [{ "cargo": "passengers" }],
+        "dwellSeconds": 3,
+        "locked": true
+      }
+    ]
+  },
+  "editorRules": {
+    "allowTerrainEdit": false,
+    "allowObjectEdit": true,
+    "allowedPieces": ["straight", "curve", "buffer", "station_track"],
+    "allowedLocomotives": ["loco_steam", "loco_diesel"],
+    "allowedWagons": ["wagon_pax"],
+    "maxTrains": 1
+  },
+  "economy": {
+    "initialMoney": 2500,
+    "fuelPrice": 0.5,
+    "refundRatio": 0.5,
+    "payOverrides": { "passengers": 16 }
+  },
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "deliver",
+      "cargo": "passengers",
+      "amount": 80,
+      "to": "st_east",
+      "from": "st_west"
+    },
+    {
+      "id": "o2",
+      "type": "deliver",
+      "cargo": "passengers",
+      "amount": 80,
+      "to": "st_west",
+      "from": "st_east"
+    }
+  ],
+  "constraints": { "timeLimitSeconds": 900 },
+  "scoring": {
+    "stars": [
+      { "stars": 3, "maxSeconds": 360, "maxFuel": 700, "maxBuildCost": 2200 },
+      { "stars": 2, "maxSeconds": 600, "maxFuel": 1100, "maxBuildCost": 2400 },
+      { "stars": 1 }
+    ]
+  },
+  "seed": 2
+}

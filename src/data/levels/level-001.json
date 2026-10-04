@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "id": "level-001",
+  "name": "First Run",
+  "description": "Haul 50 t of coal from North Mine to the Power Plant.",
+  "map": {
+    "widthPx": 1000,
+    "heightPx": 1000,
+    "defaultTerrain": "grass",
+    "terrainPatches": [
+      { "terrain": "snow", "rect": { "x": 0, "y": 0, "w": 14, "h": 6 } },
+      { "terrain": "dirt", "rect": { "x": 8, "y": 7, "w": 6, "h": 6 } },
+      { "terrain": "desert", "rect": { "x": 30, "y": 0, "w": 20, "h": 50 } },
+      { "terrain": "water", "rect": { "x": 18, "y": 28, "w": 6, "h": 4 } }
+    ],
+    "objects": [
+      { "type": "mine", "at": { "x": 11, "y": 8 }, "locked": true },
+      { "type": "power_plant", "at": { "x": 40, "y": 39 }, "locked": true },
+      { "type": "house_s", "at": { "x": 20, "y": 20 }, "locked": true },
+      { "type": "house_s", "at": { "x": 24, "y": 22 }, "locked": true },
+      { "type": "house_s", "at": { "x": 26, "y": 18 }, "locked": true },
+      { "type": "tree_pine", "at": { "x": 12, "y": 7 } },
+      { "type": "tree_pine", "at": { "x": 5, "y": 2 } },
+      { "type": "tree_pine", "at": { "x": 8, "y": 3 } },
+      { "type": "tree_pine", "at": { "x": 3, "y": 4 } },
+      { "type": "tree_pine", "at": { "x": 15, "y": 12 } },
+      { "type": "tree_pine", "at": { "x": 16, "y": 14 } },
+      { "type": "tree_pine", "at": { "x": 6, "y": 20 } },
+      { "type": "tree_pine", "at": { "x": 7, "y": 22 } },
+      { "type": "tree_pine", "at": { "x": 5, "y": 25 } },
+      { "type": "tree_pine", "at": { "x": 12, "y": 30 } },
+      { "type": "tree_pine", "at": { "x": 14, "y": 33 } },
+      { "type": "tree_pine", "at": { "x": 26, "y": 8 } },
+      { "type": "tree_pine", "at": { "x": 27, "y": 10 } },
+      { "type": "tree_pine", "at": { "x": 22, "y": 40 } },
+      { "type": "tree_pine", "at": { "x": 25, "y": 44 } },
+      { "type": "tree_pine", "at": { "x": 18, "y": 45 } },
+      { "type": "tree_pine", "at": { "x": 10, "y": 40 } },
+      { "type": "tree_oak", "at": { "x": 14, "y": 20 } },
+      { "type": "tree_oak", "at": { "x": 15, "y": 21 } },
+      { "type": "tree_oak", "at": { "x": 9, "y": 35 } },
+      { "type": "tree_oak", "at": { "x": 28, "y": 36 } },
+      { "type": "cactus", "at": { "x": 33, "y": 5 } },
+      { "type": "cactus", "at": { "x": 36, "y": 12 } },
+      { "type": "cactus", "at": { "x": 45, "y": 20 } },
+      { "type": "cactus", "at": { "x": 38, "y": 30 } },
+      { "type": "cactus", "at": { "x": 47, "y": 45 } },
+      { "type": "cactus", "at": { "x": 32, "y": 25 } },
+      { "type": "rock", "at": { "x": 31, "y": 15 } },
+      { "type": "rock", "at": { "x": 44, "y": 8 } },
+      { "type": "rock", "at": { "x": 35, "y": 33 } },
+      { "type": "rock", "at": { "x": 16, "y": 3 } }
+    ],
+    "tracks": [
+      { "at": { "x": 10, "y": 8 }, "piece": "station_track", "rotation": 0, "locked": true },
+      { "at": { "x": 10, "y": 9 }, "piece": "station_track", "rotation": 0, "locked": true },
+      { "at": { "x": 10, "y": 10 }, "piece": "station_track", "rotation": 0, "locked": true },
+      { "at": { "x": 40, "y": 38 }, "piece": "station_track", "rotation": 90, "locked": true },
+      { "at": { "x": 41, "y": 38 }, "piece": "station_track", "rotation": 90, "locked": true },
+      { "at": { "x": 42, "y": 38 }, "piece": "station_track", "rotation": 90, "locked": true }
+    ],
+    "stations": [
+      {
+        "id": "st_A",
+        "name": "North Mine",
+        "cells": [
+          { "x": 10, "y": 8 },
+          { "x": 10, "y": 9 },
+          { "x": 10, "y": 10 }
+        ],
+        "supplies": [{ "cargo": "coal", "ratePerMinute": 10, "capacity": 100, "initial": 50 }],
+        "services": ["fuel"],
+        "dwellSeconds": 3,
+        "locked": true
+      },
+      {
+        "id": "st_B",
+        "name": "Power Plant",
+        "cells": [
+          { "x": 40, "y": 38 },
+          { "x": 41, "y": 38 },
+          { "x": 42, "y": 38 }
+        ],
+        "demands": [{ "cargo": "coal" }],
+        "dwellSeconds": 3,
+        "locked": true
+      }
+    ]
+  },
+  "editorRules": {
+    "allowTerrainEdit": false,
+    "allowObjectEdit": true,
+    "allowedPieces": ["straight", "curve", "switch", "wye", "buffer", "station_track"],
+    "allowedLocomotives": ["loco_steam"],
+    "allowedWagons": ["wagon_hopper"],
+    "maxTrains": 1
+  },
+  "economy": {
+    "initialMoney": 2500,
+    "fuelPrice": 0.5,
+    "refundRatio": 0.5,
+    "payOverrides": { "coal": 30 }
+  },
+  "objectives": [
+    { "id": "o1", "type": "deliver", "cargo": "coal", "amount": 50, "to": "st_B", "from": "st_A" }
+  ],
+  "constraints": { "timeLimitSeconds": 600 },
+  "scoring": {
+    "stars": [
+      { "stars": 3, "maxSeconds": 180, "maxFuel": 300, "maxBuildCost": 1200 },
+      { "stars": 2, "maxSeconds": 300, "maxFuel": 450, "maxBuildCost": 1800 },
+      { "stars": 1 }
+    ]
+  },
+  "seed": 12345
+}

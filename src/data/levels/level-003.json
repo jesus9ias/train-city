@@ -1,0 +1,108 @@
+{
+  "schemaVersion": 1,
+  "id": "level-003",
+  "name": "Dead End Port",
+  "description": "A single line with dead ends: use switches to build a turning loop at each end.",
+  "map": {
+    "widthPx": 1000,
+    "heightPx": 1000,
+    "defaultTerrain": "grass",
+    "terrainPatches": [
+      { "terrain": "water", "rect": { "x": 40, "y": 0, "w": 10, "h": 50 } },
+      { "terrain": "dirt", "rect": { "x": 7, "y": 21, "w": 5, "h": 3 } },
+      { "terrain": "desert", "rect": { "x": 30, "y": 26, "w": 10, "h": 6 } }
+    ],
+    "objects": [
+      { "type": "mine", "at": { "x": 8, "y": 22 }, "locked": true },
+      { "type": "power_plant", "at": { "x": 31, "y": 21 }, "locked": true },
+      { "type": "tree_pine", "at": { "x": 3, "y": 5 } },
+      { "type": "tree_oak", "at": { "x": 8, "y": 8 } },
+      { "type": "tree_pine", "at": { "x": 14, "y": 6 } },
+      { "type": "tree_oak", "at": { "x": 20, "y": 10 } },
+      { "type": "tree_pine", "at": { "x": 26, "y": 7 } },
+      { "type": "tree_oak", "at": { "x": 31, "y": 12 } },
+      { "type": "tree_pine", "at": { "x": 12, "y": 15 } },
+      { "type": "tree_oak", "at": { "x": 18, "y": 18 } },
+      { "type": "tree_pine", "at": { "x": 24, "y": 20 } },
+      { "type": "tree_oak", "at": { "x": 3, "y": 32 } },
+      { "type": "tree_pine", "at": { "x": 9, "y": 36 } },
+      { "type": "tree_oak", "at": { "x": 16, "y": 33 } },
+      { "type": "tree_pine", "at": { "x": 22, "y": 38 } },
+      { "type": "tree_oak", "at": { "x": 28, "y": 34 } },
+      { "type": "tree_pine", "at": { "x": 34, "y": 40 } },
+      { "type": "tree_oak", "at": { "x": 12, "y": 44 } },
+      { "type": "tree_pine", "at": { "x": 30, "y": 46 } },
+      { "type": "rock", "at": { "x": 15, "y": 28 } },
+      { "type": "rock", "at": { "x": 24, "y": 29 } },
+      { "type": "rock", "at": { "x": 27, "y": 22 } }
+    ],
+    "tracks": [
+      { "at": { "x": 8, "y": 25 }, "piece": "station_track", "rotation": 90, "locked": true },
+      { "at": { "x": 9, "y": 25 }, "piece": "station_track", "rotation": 90, "locked": true },
+      { "at": { "x": 10, "y": 25 }, "piece": "station_track", "rotation": 90, "locked": true },
+      { "at": { "x": 32, "y": 25 }, "piece": "station_track", "rotation": 90, "locked": true },
+      { "at": { "x": 33, "y": 25 }, "piece": "station_track", "rotation": 90, "locked": true },
+      { "at": { "x": 34, "y": 25 }, "piece": "station_track", "rotation": 90, "locked": true }
+    ],
+    "stations": [
+      {
+        "id": "st_mine",
+        "name": "Hill Mine",
+        "cells": [
+          { "x": 8, "y": 25 },
+          { "x": 9, "y": 25 },
+          { "x": 10, "y": 25 }
+        ],
+        "supplies": [{ "cargo": "coal", "ratePerMinute": 15, "capacity": 90, "initial": 30 }],
+        "services": ["fuel"],
+        "dwellSeconds": 3,
+        "locked": true
+      },
+      {
+        "id": "st_port",
+        "name": "Old Port",
+        "cells": [
+          { "x": 32, "y": 25 },
+          { "x": 33, "y": 25 },
+          { "x": 34, "y": 25 }
+        ],
+        "demands": [{ "cargo": "coal" }],
+        "dwellSeconds": 3,
+        "locked": true
+      }
+    ]
+  },
+  "editorRules": {
+    "allowTerrainEdit": false,
+    "allowObjectEdit": true,
+    "allowedPieces": ["straight", "curve", "switch", "wye", "buffer", "station_track"],
+    "allowedLocomotives": ["loco_steam", "loco_diesel"],
+    "allowedWagons": ["wagon_hopper"],
+    "maxTrains": 1
+  },
+  "economy": {
+    "initialMoney": 3000,
+    "fuelPrice": 0.5,
+    "refundRatio": 0.5,
+    "payOverrides": { "coal": 20 }
+  },
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "deliver",
+      "cargo": "coal",
+      "amount": 90,
+      "to": "st_port",
+      "from": "st_mine"
+    }
+  ],
+  "constraints": { "timeLimitSeconds": 900 },
+  "scoring": {
+    "stars": [
+      { "stars": 3, "maxSeconds": 420, "maxFuel": 900, "maxBuildCost": 1300 },
+      { "stars": 2, "maxSeconds": 650, "maxFuel": 1400, "maxBuildCost": 1800 },
+      { "stars": 1 }
+    ]
+  },
+  "seed": 3
+}

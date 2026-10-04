@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "pieces": [
+    { "id": "straight", "name": "Straight", "cost": 10, "routes": [["N", "S"]] },
+    { "id": "curve", "name": "Curve", "cost": 12, "routes": [["S", "E"]] },
+    {
+      "id": "cross",
+      "name": "X crossing",
+      "cost": 30,
+      "routes": [
+        ["N", "S"],
+        ["E", "W"]
+      ]
+    },
+    {
+      "id": "switch",
+      "name": "Switch",
+      "cost": 40,
+      "stateful": true,
+      "trunk": "S",
+      "routes": [
+        ["S", "N"],
+        ["S", "E"]
+      ],
+      "defaultState": 0
+    },
+    {
+      "id": "wye",
+      "name": "Wye",
+      "cost": 40,
+      "stateful": true,
+      "trunk": "S",
+      "routes": [
+        ["S", "W"],
+        ["S", "E"]
+      ],
+      "defaultState": 0
+    },
+    { "id": "buffer", "name": "Buffer stop", "cost": 8, "routes": [["S", null]] },
+    {
+      "id": "station_track",
+      "name": "Platform track",
+      "cost": 15,
+      "routes": [["N", "S"]],
+      "isStation": true
+    }
+  ]
+}

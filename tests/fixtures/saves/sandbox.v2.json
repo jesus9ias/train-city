@@ -1,0 +1,820 @@
+{
+  "format": "traincity-save",
+  "schemaVersion": 2,
+  "gameVersion": "0.4.0",
+  "savedAt": "2026-10-03T20:00:00.000Z",
+  "levelId": "sandbox",
+  "levelHash": "fnv1a:79b042f8",
+  "mode": "running",
+  "world": {
+    "widthPx": 1600,
+    "heightPx": 1200,
+    "terrain": [
+      ["snow", 20],
+      ["grass", 20],
+      ["water", 3],
+      ["grass", 37],
+      ["snow", 20],
+      ["grass", 20],
+      ["water", 3],
+      ["grass", 37],
+      ["snow", 20],
+      ["grass", 20],
+      ["water", 3],
+      ["grass", 37],
+      ["snow", 20],
+      ["grass", 20],
+      ["water", 3],
+      ["grass", 37],
+      ["snow", 20],
+      ["grass", 20],
+      ["water", 3],
+      ["grass", 37],
+      ["snow", 20],
+      ["grass", 20],
+      ["water", 3],
+      ["grass", 37],
+      ["snow", 20],
+      ["grass", 20],
+      ["water", 3],
+      ["grass", 37],
+      ["snow", 20],
+      ["grass", 20],
+      ["water", 3],
+      ["grass", 37],
+      ["snow", 20],
+      ["grass", 20],
+      ["water", 3],
+      ["grass", 37],
+      ["snow", 20],
+      ["grass", 20],
+      ["water", 3],
+      ["grass", 37],
+      ["snow", 20],
+      ["grass", 20],
+      ["water", 3],
+      ["grass", 37],
+      ["snow", 20],
+      ["grass", 20],
+      ["water", 3],
+      ["grass", 37],
+      ["snow", 20],
+      ["grass", 20],
+      ["water", 3],
+      ["grass", 37],
+      ["snow", 20],
+      ["grass", 20],
+      ["water", 3],
+      ["grass", 37],
+      ["snow", 20],
+      ["grass", 20],
+      ["water", 3],
+      ["grass", 77],
+      ["water", 3],
+      ["grass", 77],
+      ["water", 3],
+      ["grass", 77],
+      ["water", 3],
+      ["grass", 77],
+      ["water", 3],
+      ["grass", 77],
+      ["water", 3],
+      ["grass", 77],
+      ["water", 3],
+      ["grass", 77],
+      ["water", 3],
+      ["grass", 77],
+      ["water", 3],
+      ["grass", 77],
+      ["water", 3],
+      ["grass", 77],
+      ["water", 3],
+      ["grass", 57],
+      ["dirt", 40],
+      ["grass", 40],
+      ["dirt", 40],
+      ["grass", 40],
+      ["dirt", 40],
+      ["grass", 40],
+      ["dirt", 40],
+      ["grass", 40],
+      ["dirt", 40],
+      ["grass", 40],
+      ["dirt", 40],
+      ["grass", 40],
+      ["dirt", 40],
+      ["grass", 40],
+      ["dirt", 40],
+      ["grass", 40],
+      ["dirt", 40],
+      ["grass", 40],
+      ["dirt", 40],
+      ["grass", 60],
+      ["water", 3],
+      ["grass", 77],
+      ["water", 3],
+      ["grass", 77],
+      ["water", 3],
+      ["grass", 77],
+      ["water", 3],
+      ["grass", 77],
+      ["water", 3],
+      ["grass", 77],
+      ["water", 3],
+      ["grass", 17],
+      ["desert", 20],
+      ["grass", 40],
+      ["water", 3],
+      ["grass", 17],
+      ["desert", 20],
+      ["grass", 40],
+      ["water", 3],
+      ["grass", 17],
+      ["desert", 20],
+      ["grass", 40],
+      ["water", 3],
+      ["grass", 17],
+      ["desert", 20],
+      ["grass", 40],
+      ["water", 3],
+      ["grass", 17],
+      ["desert", 20],
+      ["grass", 40],
+      ["water", 3],
+      ["grass", 17],
+      ["desert", 20],
+      ["grass", 40],
+      ["water", 3],
+      ["grass", 17],
+      ["desert", 20],
+      ["grass", 40],
+      ["water", 3],
+      ["grass", 17],
+      ["desert", 20],
+      ["grass", 40],
+      ["water", 3],
+      ["grass", 17],
+      ["desert", 20],
+      ["grass", 40],
+      ["water", 3],
+      ["grass", 17],
+      ["desert", 20],
+      ["grass", 40],
+      ["water", 3],
+      ["grass", 17],
+      ["desert", 20],
+      ["grass", 40],
+      ["water", 3],
+      ["grass", 17],
+      ["desert", 20],
+      ["grass", 40],
+      ["water", 3],
+      ["grass", 17],
+      ["desert", 20],
+      ["grass", 40],
+      ["water", 3],
+      ["grass", 17],
+      ["desert", 20],
+      ["grass", 40],
+      ["water", 3],
+      ["grass", 17],
+      ["desert", 20],
+      ["grass", 40],
+      ["water", 3],
+      ["grass", 17],
+      ["desert", 20],
+      ["grass", 40],
+      ["water", 3],
+      ["grass", 17],
+      ["desert", 20],
+      ["grass", 40],
+      ["water", 3],
+      ["grass", 17],
+      ["desert", 20],
+      ["grass", 40],
+      ["water", 3],
+      ["grass", 17],
+      ["desert", 20],
+      ["grass", 40],
+      ["water", 3],
+      ["grass", 17],
+      ["desert", 20]
+    ],
+    "objects": [
+      {
+        "id": "obj-1",
+        "type": "tree_pine",
+        "at": {
+          "x": 4,
+          "y": 4
+        },
+        "locked": false,
+        "placedInSession": null
+      },
+      {
+        "id": "obj-2",
+        "type": "tree_pine",
+        "at": {
+          "x": 9,
+          "y": 7
+        },
+        "locked": false,
+        "placedInSession": null
+      },
+      {
+        "id": "obj-3",
+        "type": "tree_oak",
+        "at": {
+          "x": 30,
+          "y": 12
+        },
+        "locked": false,
+        "placedInSession": null
+      },
+      {
+        "id": "obj-4",
+        "type": "tree_oak",
+        "at": {
+          "x": 50,
+          "y": 15
+        },
+        "locked": false,
+        "placedInSession": null
+      },
+      {
+        "id": "obj-5",
+        "type": "rock",
+        "at": {
+          "x": 55,
+          "y": 45
+        },
+        "locked": false,
+        "placedInSession": null
+      },
+      {
+        "id": "obj-6",
+        "type": "cactus",
+        "at": {
+          "x": 70,
+          "y": 50
+        },
+        "locked": false,
+        "placedInSession": null
+      },
+      {
+        "id": "obj-7",
+        "type": "house_s",
+        "at": {
+          "x": 25,
+          "y": 40
+        },
+        "locked": false,
+        "placedInSession": null
+      }
+    ],
+    "tracks": [
+      {
+        "at": {
+          "x": 50,
+          "y": 5
+        },
+        "piece": "curve",
+        "rotation": 0,
+        "state": 0,
+        "locked": false,
+        "paid": 0,
+        "placedInSession": null
+      },
+      {
+        "at": {
+          "x": 58,
+          "y": 5
+        },
+        "piece": "curve",
+        "rotation": 90,
+        "state": 0,
+        "locked": false,
+        "paid": 0,
+        "placedInSession": null
+      },
+      {
+        "at": {
+          "x": 58,
+          "y": 11
+        },
+        "piece": "curve",
+        "rotation": 180,
+        "state": 0,
+        "locked": false,
+        "paid": 0,
+        "placedInSession": null
+      },
+      {
+        "at": {
+          "x": 50,
+          "y": 11
+        },
+        "piece": "curve",
+        "rotation": 270,
+        "state": 0,
+        "locked": false,
+        "paid": 0,
+        "placedInSession": null
+      },
+      {
+        "at": {
+          "x": 51,
+          "y": 5
+        },
+        "piece": "straight",
+        "rotation": 90,
+        "state": 0,
+        "locked": false,
+        "paid": 0,
+        "placedInSession": null
+      },
+      {
+        "at": {
+          "x": 52,
+          "y": 5
+        },
+        "piece": "straight",
+        "rotation": 90,
+        "state": 0,
+        "locked": false,
+        "paid": 0,
+        "placedInSession": null
+      },
+      {
+        "at": {
+          "x": 53,
+          "y": 5
+        },
+        "piece": "straight",
+        "rotation": 90,
+        "state": 0,
+        "locked": false,
+        "paid": 0,
+        "placedInSession": null
+      },
+      {
+        "at": {
+          "x": 54,
+          "y": 5
+        },
+        "piece": "cross",
+        "rotation": 0,
+        "state": 0,
+        "locked": false,
+        "paid": 0,
+        "placedInSession": null
+      },
+      {
+        "at": {
+          "x": 55,
+          "y": 5
+        },
+        "piece": "straight",
+        "rotation": 90,
+        "state": 0,
+        "locked": false,
+        "paid": 0,
+        "placedInSession": null
+      },
+      {
+        "at": {
+          "x": 56,
+          "y": 5
+        },
+        "piece": "straight",
+        "rotation": 90,
+        "state": 0,
+        "locked": false,
+        "paid": 0,
+        "placedInSession": null
+      },
+      {
+        "at": {
+          "x": 57,
+          "y": 5
+        },
+        "piece": "straight",
+        "rotation": 90,
+        "state": 0,
+        "locked": false,
+        "paid": 0,
+        "placedInSession": null
+      },
+      {
+        "at": {
+          "x": 51,
+          "y": 11
+        },
+        "piece": "straight",
+        "rotation": 90,
+        "state": 0,
+        "locked": false,
+        "paid": 0,
+        "placedInSession": null
+      },
+      {
+        "at": {
+          "x": 52,
+          "y": 11
+        },
+        "piece": "straight",
+        "rotation": 90,
+        "state": 0,
+        "locked": false,
+        "paid": 0,
+        "placedInSession": null
+      },
+      {
+        "at": {
+          "x": 53,
+          "y": 11
+        },
+        "piece": "straight",
+        "rotation": 90,
+        "state": 0,
+        "locked": false,
+        "paid": 0,
+        "placedInSession": null
+      },
+      {
+        "at": {
+          "x": 54,
+          "y": 11
+        },
+        "piece": "straight",
+        "rotation": 90,
+        "state": 0,
+        "locked": false,
+        "paid": 0,
+        "placedInSession": null
+      },
+      {
+        "at": {
+          "x": 55,
+          "y": 11
+        },
+        "piece": "straight",
+        "rotation": 90,
+        "state": 0,
+        "locked": false,
+        "paid": 0,
+        "placedInSession": null
+      },
+      {
+        "at": {
+          "x": 56,
+          "y": 11
+        },
+        "piece": "switch",
+        "rotation": 270,
+        "state": 1,
+        "locked": false,
+        "paid": 0,
+        "placedInSession": null
+      },
+      {
+        "at": {
+          "x": 57,
+          "y": 11
+        },
+        "piece": "straight",
+        "rotation": 90,
+        "state": 0,
+        "locked": false,
+        "paid": 0,
+        "placedInSession": null
+      },
+      {
+        "at": {
+          "x": 50,
+          "y": 6
+        },
+        "piece": "straight",
+        "rotation": 0,
+        "state": 0,
+        "locked": false,
+        "paid": 0,
+        "placedInSession": null
+      },
+      {
+        "at": {
+          "x": 58,
+          "y": 6
+        },
+        "piece": "straight",
+        "rotation": 0,
+        "state": 0,
+        "locked": false,
+        "paid": 0,
+        "placedInSession": null
+      },
+      {
+        "at": {
+          "x": 50,
+          "y": 7
+        },
+        "piece": "straight",
+        "rotation": 0,
+        "state": 0,
+        "locked": false,
+        "paid": 0,
+        "placedInSession": null
+      },
+      {
+        "at": {
+          "x": 58,
+          "y": 7
+        },
+        "piece": "straight",
+        "rotation": 0,
+        "state": 0,
+        "locked": false,
+        "paid": 0,
+        "placedInSession": null
+      },
+      {
+        "at": {
+          "x": 50,
+          "y": 8
+        },
+        "piece": "straight",
+        "rotation": 0,
+        "state": 0,
+        "locked": false,
+        "paid": 0,
+        "placedInSession": null
+      },
+      {
+        "at": {
+          "x": 58,
+          "y": 8
+        },
+        "piece": "straight",
+        "rotation": 0,
+        "state": 0,
+        "locked": false,
+        "paid": 0,
+        "placedInSession": null
+      },
+      {
+        "at": {
+          "x": 50,
+          "y": 9
+        },
+        "piece": "straight",
+        "rotation": 0,
+        "state": 0,
+        "locked": false,
+        "paid": 0,
+        "placedInSession": null
+      },
+      {
+        "at": {
+          "x": 58,
+          "y": 9
+        },
+        "piece": "straight",
+        "rotation": 0,
+        "state": 0,
+        "locked": false,
+        "paid": 0,
+        "placedInSession": null
+      },
+      {
+        "at": {
+          "x": 50,
+          "y": 10
+        },
+        "piece": "straight",
+        "rotation": 0,
+        "state": 0,
+        "locked": false,
+        "paid": 0,
+        "placedInSession": null
+      },
+      {
+        "at": {
+          "x": 58,
+          "y": 10
+        },
+        "piece": "straight",
+        "rotation": 0,
+        "state": 0,
+        "locked": false,
+        "paid": 0,
+        "placedInSession": null
+      },
+      {
+        "at": {
+          "x": 54,
+          "y": 4
+        },
+        "piece": "straight",
+        "rotation": 0,
+        "state": 0,
+        "locked": false,
+        "paid": 0,
+        "placedInSession": null
+      },
+      {
+        "at": {
+          "x": 54,
+          "y": 3
+        },
+        "piece": "buffer",
+        "rotation": 0,
+        "state": 0,
+        "locked": false,
+        "paid": 0,
+        "placedInSession": null
+      },
+      {
+        "at": {
+          "x": 54,
+          "y": 6
+        },
+        "piece": "straight",
+        "rotation": 0,
+        "state": 0,
+        "locked": false,
+        "paid": 0,
+        "placedInSession": null
+      },
+      {
+        "at": {
+          "x": 54,
+          "y": 7
+        },
+        "piece": "buffer",
+        "rotation": 180,
+        "state": 0,
+        "locked": false,
+        "paid": 0,
+        "placedInSession": null
+      },
+      {
+        "at": {
+          "x": 56,
+          "y": 10
+        },
+        "piece": "straight",
+        "rotation": 0,
+        "state": 0,
+        "locked": false,
+        "paid": 0,
+        "placedInSession": null
+      },
+      {
+        "at": {
+          "x": 56,
+          "y": 9
+        },
+        "piece": "buffer",
+        "rotation": 0,
+        "state": 0,
+        "locked": false,
+        "paid": 0,
+        "placedInSession": null
+      },
+      {
+        "at": {
+          "x": 44,
+          "y": 8
+        },
+        "piece": "buffer",
+        "rotation": 270,
+        "state": 0,
+        "locked": false,
+        "paid": 0,
+        "placedInSession": null
+      },
+      {
+        "at": {
+          "x": 45,
+          "y": 8
+        },
+        "piece": "straight",
+        "rotation": 90,
+        "state": 0,
+        "locked": false,
+        "paid": 0,
+        "placedInSession": null
+      },
+      {
+        "at": {
+          "x": 46,
+          "y": 8
+        },
+        "piece": "wye",
+        "rotation": 90,
+        "state": 0,
+        "locked": false,
+        "paid": 0,
+        "placedInSession": null
+      },
+      {
+        "at": {
+          "x": 46,
+          "y": 7
+        },
+        "piece": "buffer",
+        "rotation": 0,
+        "state": 0,
+        "locked": false,
+        "paid": 0,
+        "placedInSession": null
+      },
+      {
+        "at": {
+          "x": 46,
+          "y": 9
+        },
+        "piece": "buffer",
+        "rotation": 180,
+        "state": 0,
+        "locked": false,
+        "paid": 0,
+        "placedInSession": null
+      }
+    ],
+    "stations": [],
+    "trains": [
+      {
+        "id": "t1",
+        "locomotive": "loco_diesel",
+        "wagons": [
+          {
+            "model": "wagon_pax",
+            "cargo": null,
+            "amount": 0
+          },
+          {
+            "model": "wagon_box",
+            "cargo": null,
+            "amount": 0
+          }
+        ],
+        "head": {
+          "cell": {
+            "x": 58,
+            "y": 7
+          },
+          "entry": "N",
+          "exit": "S"
+        },
+        "trail": [
+          {
+            "cell": {
+              "x": 58,
+              "y": 6
+            },
+            "entry": "N",
+            "exit": "S"
+          },
+          {
+            "cell": {
+              "x": 58,
+              "y": 5
+            },
+            "entry": "W",
+            "exit": "S"
+          }
+        ],
+        "progress": 0.37920367320510895,
+        "speed": 3,
+        "running": true,
+        "status": "running",
+        "fuel": 800,
+        "autoRefuel": true,
+        "purchaseValue": 640,
+        "paid": 1040,
+        "placedInSession": 1
+      }
+    ]
+  },
+  "run": {
+    "elapsedTicks": 120,
+    "paused": false
+  },
+  "economy": {
+    "initialMoney": null,
+    "ledger": {
+      "build": 0,
+      "objects": 0,
+      "trains": 640,
+      "fuel": 400,
+      "revenue": 0,
+      "refunds": 0
+    }
+  },
+  "editor": {
+    "session": 2,
+    "nextObjectId": 8,
+    "nextTrainId": 2
+  }
+}

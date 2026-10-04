@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "terrains": [
+    {
+      "id": "grass",
+      "name": "Grass",
+      "color": "#5DA130",
+      "sprite": { "atlas": "terrain", "frames": ["grass_0", "grass_1", "grass_2"] },
+      "buildable": true,
+      "trackCostMultiplier": 1.0,
+      "fuelMultiplier": 1.0,
+      "speedMultiplier": 1.0
+    },
+    {
+      "id": "dirt",
+      "name": "Dirt",
+      "color": "#8B6B3E",
+      "buildable": true,
+      "trackCostMultiplier": 1.0,
+      "fuelMultiplier": 1.05,
+      "speedMultiplier": 1.0
+    },
+    {
+      "id": "desert",
+      "name": "Desert",
+      "color": "#E3C77A",
+      "buildable": true,
+      "trackCostMultiplier": 1.2,
+      "fuelMultiplier": 1.15,
+      "speedMultiplier": 0.95
+    },
+    {
+      "id": "snow",
+      "name": "Snow",
+      "color": "#F2F6FA",
+      "buildable": true,
+      "trackCostMultiplier": 1.5,
+      "fuelMultiplier": 1.3,
+      "speedMultiplier": 0.85
+    },
+    {
+      "id": "water",
+      "name": "Water",
+      "color": "#3B7DD8",
+      "buildable": false,
+      "trackCostMultiplier": 0,
+      "fuelMultiplier": 1.0,
+      "speedMultiplier": 1.0
+    }
+  ]
+}

@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "locomotives": [
+    {
+      "id": "loco_steam",
+      "name": "Steam",
+      "maxSpeed": 2.0,
+      "acceleration": 0.5,
+      "fuelCapacity": 500,
+      "fuelPerUnit": 1.0,
+      "fuelIdlePerSecond": 0.05,
+      "weight": 60,
+      "maxWagons": 5,
+      "cost": 300,
+      "render": { "color": "#222222" },
+      "sprite": { "atlas": "vehicles", "prefix": "loco_steam" }
+    },
+    {
+      "id": "loco_diesel",
+      "name": "Diesel",
+      "maxSpeed": 3.0,
+      "acceleration": 0.8,
+      "fuelCapacity": 800,
+      "fuelPerUnit": 0.8,
+      "fuelIdlePerSecond": 0.02,
+      "weight": 50,
+      "maxWagons": 8,
+      "cost": 500,
+      "render": { "color": "#C8102E" }
+    }
+  ],
+  "wagons": [
+    {
+      "id": "wagon_pax",
+      "name": "Passenger car",
+      "accepts": ["passengers"],
+      "capacity": 40,
+      "emptyWeight": 10,
+      "cost": 80,
+      "render": { "color": "#2B5DA8" }
+    },
+    {
+      "id": "wagon_hopper",
+      "name": "Hopper",
+      "accepts": ["coal", "grain"],
+      "capacity": 30,
+      "emptyWeight": 12,
+      "cost": 70,
+      "render": { "color": "#5A4632" }
+    },
+    {
+      "id": "wagon_tank",
+      "name": "Tank car",
+      "accepts": ["oil"],
+      "capacity": 25,
+      "emptyWeight": 12,
+      "cost": 90,
+      "render": { "color": "#444444" }
+    },
+    {
+      "id": "wagon_box",
+      "name": "Boxcar",
+      "accepts": ["goods"],
+      "capacity": 20,
+      "emptyWeight": 10,
+      "cost": 60,
+      "render": { "color": "#8C6D3F" }
+    }
+  ]
+}

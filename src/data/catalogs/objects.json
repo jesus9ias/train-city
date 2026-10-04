@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "objects": [
+    {
+      "id": "tree_pine",
+      "name": "Pine tree",
+      "category": "nature",
+      "footprint": { "w": 1, "h": 1 },
+      "blocksTrack": true,
+      "removable": true,
+      "removeCost": 5,
+      "render": { "shape": "circle", "color": "#2F6B2F" },
+      "sprite": { "atlas": "objects", "frames": ["tree_pine_0"] },
+      "allowedTerrains": ["grass", "dirt", "snow"]
+    },
+    {
+      "id": "tree_oak",
+      "name": "Oak tree",
+      "category": "nature",
+      "footprint": { "w": 1, "h": 1 },
+      "blocksTrack": true,
+      "removable": true,
+      "removeCost": 5,
+      "render": { "shape": "circle", "color": "#3E8E3A" },
+      "allowedTerrains": ["grass", "dirt"]
+    },
+    {
+      "id": "cactus",
+      "name": "Cactus",
+      "category": "nature",
+      "footprint": { "w": 1, "h": 1 },
+      "blocksTrack": true,
+      "removable": true,
+      "removeCost": 4,
+      "render": { "shape": "rect", "color": "#4F8A3C" },
+      "allowedTerrains": ["desert"]
+    },
+    {
+      "id": "rock",
+      "name": "Rock",
+      "category": "nature",
+      "footprint": { "w": 1, "h": 1 },
+      "blocksTrack": true,
+      "removable": true,
+      "removeCost": 10,
+      "render": { "shape": "circle", "color": "#7A7A7A" }
+    },
+    {
+      "id": "house_s",
+      "name": "House",
+      "category": "building",
+      "footprint": { "w": 2, "h": 2 },
+      "blocksTrack": true,
+      "removable": false,
+      "render": { "shape": "rect", "color": "#B5533C" }
+    },
+    {
+      "id": "mine",
+      "name": "Coal mine",
+      "category": "building",
+      "footprint": { "w": 2, "h": 2 },
+      "blocksTrack": true,
+      "removable": false,
+      "render": { "shape": "rect", "color": "#4A4A4A" }
+    },
+    {
+      "id": "power_plant",
+      "name": "Power plant",
+      "category": "building",
+      "footprint": { "w": 3, "h": 3 },
+      "blocksTrack": true,
+      "removable": false,
+      "render": { "shape": "rect", "color": "#8C8F99" }
+    }
+  ]
+}

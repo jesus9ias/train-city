@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "cargoTypes": [
+    {
+      "id": "passengers",
+      "name": "Passengers",
+      "unit": "pax",
+      "weightPerUnit": 0.08,
+      "payPerUnit": 3
+    },
+    { "id": "coal", "name": "Coal", "unit": "t", "weightPerUnit": 1.0, "payPerUnit": 5 },
+    { "id": "grain", "name": "Grain", "unit": "t", "weightPerUnit": 0.8, "payPerUnit": 6 },
+    { "id": "oil", "name": "Oil", "unit": "kl", "weightPerUnit": 0.9, "payPerUnit": 8 },
+    { "id": "goods", "name": "Goods", "unit": "u", "weightPerUnit": 0.5, "payPerUnit": 10 }
+  ]
+}
