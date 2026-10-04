@@ -1,7 +1,9 @@
 import type { z } from 'zod';
 import { CELL_SIZE, FEATURES, MAP_MAX_PX, MAP_MIN_PX } from '../core/constants';
 import type { Cell } from '../core/grid/coords';
-import { isDiagonal, isValidRotation, oppositePort, type Port } from '../core/grid/ports';
+import { isDiagonal, oppositePort, type Port } from '../core/grid/ports';
+import { isDrawableRoute } from '../core/track/geometry';
+import { canPlaceAt } from '../core/track/rotation';
 import { piecePorts } from '../core/track/routes';
 import {
   cellIndex,
@@ -134,8 +136,11 @@ export function validateCatalogs(raw: RawCatalogs): Result<Catalogs> {
       if (!FEATURES.diagonals && ports.some(isDiagonal)) {
         pieceIssues.add(['pieces', i, 'routes', j], 'Diagonal ports are not enabled');
       }
-      if (from === to)
+      if (from === to) {
         pieceIssues.add(['pieces', i, 'routes', j], 'a route needs two different ports');
+      } else if (!isDrawableRoute(from, to)) {
+        pieceIssues.add(['pieces', i, 'routes', j], 'this route cannot be drawn (see spec §4.4)');
+      }
     });
     if (piece.stateful) {
       if (piece.trunk === undefined) {
@@ -275,7 +280,7 @@ export function validateLevel(raw: unknown, catalogs: Catalogs, source = 'level'
       issues.add([...path, 'piece'], `unknown piece "${track.piece}"`);
       return;
     }
-    if (!isValidRotation(track.rotation, FEATURES.diagonals)) {
+    if (!canPlaceAt(piece, track.rotation)) {
       issues.add([...path, 'rotation'], `invalid rotation ${track.rotation}`);
       return;
     }

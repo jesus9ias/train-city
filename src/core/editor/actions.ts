@@ -1,8 +1,8 @@
-import { FEATURES } from '../constants';
 import { canAfford, record, roundMoney } from '../economy/ledger';
 import type { GameState, RulesContext } from '../game/state';
 import type { Cell } from '../grid/coords';
-import { isValidRotation, type Port } from '../grid/ports';
+import type { Port } from '../grid/ports';
+import { canPlaceAt, rotationStep } from '../track/rotation';
 import { routeLength } from '../track/geometry';
 import { layoutTrainFacing, trainAt } from '../sim/placement';
 import type { TrainState } from '../sim/train';
@@ -120,7 +120,7 @@ function placeTrack(
   const piece = catalogs.pieces[pieceId];
   const label = piece?.name ?? pieceId;
   if (!piece || !isAllowed(rules.allowedPieces, piece.id)) return fail(REASONS.notAllowed, label);
-  if (!isValidRotation(rotation, FEATURES.diagonals)) return fail(REASONS.invalidRotation, label);
+  if (!canPlaceAt(piece, rotation)) return fail(REASONS.invalidRotation, label);
   if (!inBounds(world, cell)) return fail(REASONS.outside, label);
   if (trackAt(world, cell)) return fail(REASONS.occupied, label);
   const object = objectAt(world, catalogs, cell);
@@ -255,7 +255,9 @@ function rotateTrack(state: GameState, { catalogs }: RulesContext, cell: Cell): 
   if (track.locked) return fail(REASONS.locked, label);
   if (stationAt(world, cell)) return fail(REASONS.partOfStation, label);
   if (trainAt(state.trains, cell)) return fail(REASONS.trainOccupied, label);
-  const rotated: PlacedTrack = { ...track, rotation: (track.rotation + 90) % 360 };
+  const piece = catalogs.pieces[track.piece];
+  const step = piece ? rotationStep(piece) : 90;
+  const rotated: PlacedTrack = { ...track, rotation: (track.rotation + step) % 360 };
   return {
     ok: true,
     state: withWorld(state, {
@@ -369,6 +371,12 @@ function placeTrain(
 }
 
 /** Scrapping refunds everything in the session it was bought, else part of the vehicles' value. */
+export function scrapRefund(state: GameState, refundRatio: number, train: TrainState): number {
+  return train.placedInSession === state.editorSession
+    ? train.paid
+    : roundMoney(train.purchaseValue * refundRatio);
+}
+
 function scrapTrain(
   state: GameState,
   catalogs: RulesContext['catalogs'],
@@ -376,10 +384,7 @@ function scrapTrain(
   train: TrainState,
 ): ActionOutcome {
   const label = `Scrap ${catalogs.locomotives[train.locomotive]?.name ?? train.locomotive} train`;
-  const refund =
-    train.placedInSession === state.editorSession
-      ? train.paid
-      : roundMoney(train.purchaseValue * refundRatio);
+  const refund = scrapRefund(state, refundRatio, train);
   return {
     ok: true,
     state: {

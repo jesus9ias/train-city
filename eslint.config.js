@@ -49,6 +49,10 @@ export default tseslint.config(
     },
   },
   {
+    files: ['scripts/**/*.ts', 'src/art/png.ts'],
+    languageOptions: { globals: { ...globals.node } },
+  },
+  {
     files: ['*.config.{js,ts}'],
     languageOptions: { globals: { ...globals.node } },
     ...tseslint.configs.disableTypeChecked,
@@ -88,6 +92,24 @@ export default tseslint.config(
       'no-restricted-syntax': [
         'error',
         { selector: "NewExpression[callee.name='Date']", message: 'core/ must be deterministic.' },
+      ],
+    },
+  },
+  {
+    files: ['src/art/**/*.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            ...frameworkImports.map((p) => ({ ...p, message: p.message.replace('core/', 'art/') })),
+            layer('render'),
+            layer('ui'),
+            layer('state'),
+            layer('persistence'),
+            layer('app'),
+          ],
+        },
       ],
     },
   },

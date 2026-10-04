@@ -2,15 +2,32 @@ import { applyAction, type ActionOutcome, type EditorAction } from '../core/edit
 import { RUN_REASONS } from '../core/sim/commands';
 import type { Cell } from '../core/grid/coords';
 import { facingFromRotation, trainAt } from '../core/sim/placement';
+import { snapRotation } from '../core/track/rotation';
+import type { Catalogs } from '../data/schemas/catalogs';
 import type { Tool } from './editorStore';
 import type { ReadySession } from './gameStore';
 import type { AppStores } from './stores';
 
-/** The editor action a tool performs on a cell (null for tools that do not edit). */
-export function toolAction(tool: Tool | null, rotation: number, cell: Cell): EditorAction | null {
+/**
+ * The editor action a tool performs on a cell (null for tools that do not edit). With the
+ * catalogs, a track's rotation snaps to one the piece can take (spec.md §4.4).
+ */
+export function toolAction(
+  tool: Tool | null,
+  rotation: number,
+  cell: Cell,
+  catalogs?: Catalogs,
+): EditorAction | null {
   switch (tool?.kind) {
-    case 'track':
-      return { type: 'placeTrack', cell, piece: tool.piece, rotation };
+    case 'track': {
+      const piece = catalogs?.pieces[tool.piece];
+      return {
+        type: 'placeTrack',
+        cell,
+        piece: tool.piece,
+        rotation: piece ? snapRotation(piece, rotation) : rotation,
+      };
+    }
     case 'object':
       return { type: 'placeObject', cell, object: tool.object };
     case 'terrain':
@@ -44,7 +61,7 @@ export function previewAt(
   rotation: number,
   cell: Cell,
 ): ActionOutcome | null {
-  const action = toolAction(tool, rotation, cell);
+  const action = toolAction(tool, rotation, cell, session.ctx.catalogs);
   return action ? applyAction(session.game, session.ctx, action) : null;
 }
 
@@ -68,7 +85,7 @@ export function createEditorController({ game, editor }: AppStores) {
       editor.getState().selectTrain(trainAt(session.game.trains, cell)?.id ?? null);
       return;
     }
-    const action = toolAction(tool, rotation, cell);
+    const action = toolAction(tool, rotation, cell, session.ctx.catalogs);
     if (!action) return;
     const outcome = game.getState().execute(action);
     if (!outcome.ok && reportFailure) editor.getState().notify(outcome.reason);

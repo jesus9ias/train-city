@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useStore } from 'zustand';
 import { loadAtlasManifest } from '../data/loader';
 import type { GameFileActions } from '../persistence';
@@ -17,7 +17,11 @@ import { Palette } from '../ui/Palette';
 import { StatusBar } from '../ui/StatusBar';
 import { Toast } from '../ui/Toast';
 import { RunPanel } from '../ui/TrainPanel';
+import { MapControls } from '../ui/MapControls';
+import { COMPACT_QUERY, useMediaQuery } from '../ui/useMediaQuery';
 import { useShortcuts } from '../ui/useShortcuts';
+
+type Drawer = 'tools' | 'info';
 
 type Props = {
   stores: AppStores;
@@ -36,7 +40,24 @@ export function App({ stores, initialLevelId, onLevelChange, fileActions }: Prop
   const results = useStore(stores.progress, (s) => s.results);
   const [atlases] = useState(() => loadAtlasManifest().atlases);
   const [pointer, setPointer] = useState<{ x: number; y: number } | null>(null);
+  const compact = useMediaQuery(COMPACT_QUERY);
+  const [drawer, setDrawer] = useState<Drawer | null>(null);
   useShortcuts(stores);
+
+  // Compact layout: picking a tool hands the screen back to the map, and selecting a train
+  // shows its details (spec.md §13.1).
+  useEffect(
+    () =>
+      editor.subscribe((state, prev) => {
+        if (state.tool && state.tool !== prev.tool) {
+          setDrawer((open) => (open === 'tools' ? null : open));
+        }
+        if (state.selectedTrain && state.selectedTrain !== prev.selectedTrain) setDrawer('info');
+      }),
+    [editor],
+  );
+  /** Drawers only exist in the compact layout. */
+  const openDrawer = compact ? drawer : null;
 
   useEffect(() => {
     void game.getState().loadLevel(initialLevelId);
@@ -61,8 +82,35 @@ export function App({ stores, initialLevelId, onLevelChange, fileActions }: Prop
     void game.getState().loadLevel(id);
   };
 
+  const toggle = (name: Drawer) => {
+    setDrawer(openDrawer === name ? null : name);
+  };
+  /** In the compact layout, side panels live in drawers over the map. */
+  const inDrawer = (name: Drawer, panel: ReactNode) =>
+    compact ? (
+      <div
+        className={`drawer drawer--${name === 'tools' ? 'left' : 'right'}`}
+        hidden={openDrawer !== name}
+        data-testid={`drawer-${name}`}
+      >
+        <button
+          type="button"
+          className="tool-button drawer__close"
+          aria-label="Close panel"
+          onClick={() => {
+            setDrawer(null);
+          }}
+        >
+          ✕
+        </button>
+        {panel}
+      </div>
+    ) : (
+      panel
+    );
+
   return (
-    <div className="app">
+    <div className={`app${compact ? ' app--compact' : ''}`}>
       <header className="top-bar">
         <h1 className="top-bar__title">Train City</h1>
         <LevelPicker levels={levels} results={results} currentId={levelId} onSelect={selectLevel} />
@@ -72,17 +120,44 @@ export function App({ stores, initialLevelId, onLevelChange, fileActions }: Prop
           </span>
         )}
         {session.status === 'ready' && <ModeBar stores={stores} session={session} />}
+        {session.status === 'ready' && compact && (
+          <div className="top-bar__drawers">
+            <button
+              type="button"
+              className="tool-button"
+              aria-expanded={openDrawer === 'tools'}
+              onClick={() => {
+                toggle('tools');
+              }}
+            >
+              {session.game.mode === 'editing' ? 'Build' : 'Trains'}
+            </button>
+            <button
+              type="button"
+              className="tool-button"
+              aria-expanded={openDrawer === 'info'}
+              onClick={() => {
+                toggle('info');
+              }}
+            >
+              Info
+            </button>
+          </div>
+        )}
         {session.status === 'ready' && fileActions && (
-          <GameMenu actions={fileActions} saveStatus={stores.saveStatus} />
+          <GameMenu actions={fileActions} saveStatus={stores.saveStatus} compact={compact} />
         )}
       </header>
       <div className="app__body">
         {session.status === 'ready' &&
-          (session.game.mode === 'editing' ? (
-            <Palette stores={stores} session={session} />
-          ) : (
-            <RunPanel stores={stores} session={session} />
-          ))}
+          inDrawer(
+            'tools',
+            session.game.mode === 'editing' ? (
+              <Palette stores={stores} session={session} />
+            ) : (
+              <RunPanel stores={stores} session={session} />
+            ),
+          )}
         <main
           className="app__main"
           onMouseMove={(event) => {
@@ -101,6 +176,7 @@ export function App({ stores, initialLevelId, onLevelChange, fileActions }: Prop
                 data={sceneData}
               />
               <CursorTooltip stores={stores} session={session} position={pointer} />
+              {compact && <MapControls stores={stores} session={session} />}
             </>
           )}
           {session.status === 'loading' && <p className="app__notice">Loading level…</p>}
@@ -131,7 +207,19 @@ export function App({ stores, initialLevelId, onLevelChange, fileActions }: Prop
             />
           )}
         </main>
-        {session.status === 'ready' && <Inspector stores={stores} session={session} />}
+        {session.status === 'ready' &&
+          inDrawer('info', <Inspector stores={stores} session={session} />)}
+        {openDrawer && (
+          <button
+            type="button"
+            className="drawer-backdrop"
+            aria-label="Close panel"
+            tabIndex={-1}
+            onClick={() => {
+              setDrawer(null);
+            }}
+          />
+        )}
       </div>
       <StatusBar stores={stores} />
     </div>

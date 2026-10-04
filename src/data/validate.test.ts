@@ -168,7 +168,7 @@ describe('level tracks', () => {
         tracks: [
           { at: { x: 0, y: 0 }, piece: 'straight', rotation: 0 },
           { at: { x: 5, y: 5 }, piece: 'straight', rotation: 0 },
-          { at: { x: 6, y: 6 }, piece: 'straight', rotation: 45 },
+          { at: { x: 6, y: 6 }, piece: 'curve', rotation: 45 },
           { at: { x: 7, y: 7 }, piece: 'monorail', rotation: 0 },
           { at: { x: 60, y: 7 }, piece: 'straight', rotation: 0 },
           { at: { x: 8, y: 8 }, piece: 'switch', rotation: 0, state: 2 },
@@ -315,7 +315,9 @@ describe('Feature: Content extensible through JSON', () => {
 
   it('Scenario: Add a new terrain without code', () => {
     const result = rawWith((raw) => {
-      raw.terrains.terrains.push({
+      // A modder's terrain: no sprite and an off-palette color are both allowed.
+      const terrains: unknown[] = raw.terrains.terrains;
+      terrains.push({
         id: 'mud',
         name: 'Mud',
         color: '#5B4A3A',
@@ -338,17 +340,17 @@ describe('Feature: Content extensible through JSON', () => {
     expect(issuesOf(result)).toContain('terrains.json: terrains[5].id: duplicate id: grass');
   });
 
-  it('Scenario: Diagonal ports are reserved in the MVP', () => {
+  it('Scenario: Diagonal pieces are data, but every route must be drawable (Stage 8)', () => {
     const result = rawWith((raw) => {
-      (raw.trackPieces.pieces as unknown[]).push({
-        id: 'diag',
-        name: 'Diagonal',
-        cost: 1,
-        routes: [['NE', 'SW']],
-      });
+      (raw.trackPieces.pieces as unknown[]).push(
+        { id: 'diag', name: 'Diagonal', cost: 1, routes: [['NE', 'SW']] },
+        { id: 'hairpin', name: 'Hairpin', cost: 1, routes: [['SW', 'SE']] },
+      );
     });
-    expect(issuesOf(result)).toContain(
-      'track-pieces.json: pieces[7].routes[0]: Diagonal ports are not enabled',
+    const issues = issuesOf(result);
+    expect(issues.some((i) => i.includes('pieces[9]'))).toBe(false);
+    expect(issues).toContain(
+      'track-pieces.json: pieces[10].routes[0]: this route cannot be drawn (see spec §4.4)',
     );
   });
 
@@ -390,11 +392,11 @@ describe('Feature: Content extensible through JSON', () => {
     });
     expect(issuesOf(result)).toEqual([
       'objects.json: objects[0].allowedTerrains[0]: unknown terrain "lava"',
-      'track-pieces.json: pieces[7].routes[0]: a route needs two different ports',
-      'track-pieces.json: pieces[8].trunk: stateful pieces need a trunk port',
-      'track-pieces.json: pieces[9].routes: every route must include the trunk "W"',
-      'track-pieces.json: pieces[9].routes: stateful pieces need at least two routes',
-      'track-pieces.json: pieces[9].defaultState: defaultState is out of range',
+      'track-pieces.json: pieces[9].routes[0]: a route needs two different ports',
+      'track-pieces.json: pieces[10].trunk: stateful pieces need a trunk port',
+      'track-pieces.json: pieces[11].routes: every route must include the trunk "W"',
+      'track-pieces.json: pieces[11].routes: stateful pieces need at least two routes',
+      'track-pieces.json: pieces[11].defaultState: defaultState is out of range',
       'train-models.json: wagons[0].accepts[0]: unknown cargo "unobtainium"',
     ]);
   });

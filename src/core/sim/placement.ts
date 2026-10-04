@@ -1,6 +1,7 @@
 import type { TrackPieceDef } from '../../data/schemas/catalogs';
 import type { Cell } from '../grid/coords';
-import { CARDINAL_PORTS, neighbor, oppositePort, rotatePort, type Port } from '../grid/ports';
+import { FEATURES } from '../constants';
+import { neighbor, oppositePort, rotatePort, type Port } from '../grid/ports';
 import { cellKey, inBounds, trackAt, type WorldState } from '../world/world';
 import { entryFor } from './routing';
 import type { CellPass, TrainState } from './train';
@@ -48,8 +49,8 @@ export function layoutTrain(
 }
 
 /**
- * Tries `preferred` first, then the other directions clockwise, so pressing R cycles through
- * the directions the track actually allows.
+ * Tries `preferred` first, then the other directions clockwise (in 45° steps with diagonals),
+ * so pressing R cycles through the directions the track actually allows.
  */
 export function layoutTrainFacing(
   world: WorldState,
@@ -59,17 +60,19 @@ export function layoutTrainFacing(
   wagonCount: number,
 ): TrainLayout {
   let first: TrainLayout | null = null;
-  for (let i = 0; i < CARDINAL_PORTS.length; i++) {
-    const layout = layoutTrain(world, pieces, cell, rotatePort(preferred, i * 90), wagonCount);
+  const step = FEATURES.diagonals ? 45 : 90;
+  for (let i = 0; i < 360 / step; i++) {
+    const layout = layoutTrain(world, pieces, cell, rotatePort(preferred, i * step), wagonCount);
     if (layout.ok) return layout;
     first ??= layout;
   }
   return first ?? { ok: false, reason: TRAIN_DOES_NOT_FIT };
 }
 
-/** Facing port for an editor rotation: 0° → N, 90° → E, 180° → S, 270° → W. */
+/** Facing port for an editor rotation: 0° → N, 45° → NE, 90° → E… (90° steps without diagonals). */
 export function facingFromRotation(rotation: number): Port {
-  return rotatePort('N', Math.round(rotation / 90) * 90);
+  const step = FEATURES.diagonals ? 45 : 90;
+  return rotatePort('N', Math.round(rotation / step) * step);
 }
 
 export function trainAt(trains: readonly TrainState[], cell: Cell): TrainState | undefined {

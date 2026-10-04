@@ -121,12 +121,13 @@ train-city/
 ├─ docs/
 │  ├─ adr/                     # Architecture Decision Records
 │  └─ art.md                   # pixel-art guide: palette, sizes, naming
-├─ art/                        # source files (.aseprite), not shipped
+├─ scripts/build-art.ts       # `pnpm art`: generates the atlases from src/art
 ├─ public/assets/
 │  ├─ atlases/                 # terrain/objects/tracks/vehicles/ui .png + .json
 │  └─ LICENSES.md              # origin/license of every asset
 ├─ src/
 │  ├─ app/                     # App.tsx, simple routing (menu → level)
+│  ├─ art/                     # palette + sprite drawing code, atlas packer (ADR-002)
 │  ├─ core/
 │  │  ├─ grid/                 # coordinates, ports (8 directions), helpers
 │  │  ├─ track/                # pieces, rotation, routes, geometry, graph
@@ -181,7 +182,7 @@ train-city/
 | `NW` | top-left corner | (−1, −1) | `SE` |
 
 - A port of a cell connects **only** to the opposite port of the neighbor given by its offset. A diagonal port (corner) connects only to the diagonal neighbor, never to the two orthogonal cells that share that corner.
-- **MVP (Stages 0–7) uses only the cardinal ports** `N/E/S/W`. Diagonal ports are valid in the types and schemas, but the level/catalog validator rejects them until Stage 8 is enabled (`features.diagonals` flag in `core/constants.ts`).
+- **Stages 0–7 used only the cardinal ports** `N/E/S/W`. From **Stage 8** (`features.diagonals` on in `core/constants.ts`) diagonal ports are enabled: pieces can reach corners, and some pieces rotate in 45° steps (§4.4).
 
 Each cell has **layers**:
 
@@ -278,7 +279,16 @@ Each piece has **routes**: pairs of ports a train can traverse. A **stateful** p
           main line
 ```
 
-Future (Stage 8+): diagonal pieces (diagonal straight, 45° curves, diagonal switches); bridges and tunnels, signals, double slips and slopes are in the backlog.
+**Diagonals (Stage 8).** A route is *drawable* when it is one of: opposite ports (straight: 1 unit cardinal, √2 diagonal); a port and a dead end; a 90° curve between two cardinal ports (quarter circle); or a **45° turn** between a cardinal port and a corner three steps away (e.g. `S → NE`, drawn as a tangent-continuous cubic curve, length ≈ 1.17 units). Sharp 90° curves between two corners are not used (D11). A piece may be placed at a rotation when every rotated route is drawable; platform tracks only in 90° steps. So the straight, the X crossing and the buffer stop rotate in 45° steps (a straight at 45° *is* the diagonal straight), the 90° curve, switch and wye in 90° steps, and two new pieces cover the rest:
+
+```json
+{ "id": "curve45",  "name": "45° curve",       "cost": 12, "routes": [["S","NE"]] },
+{ "id": "switch45", "name": "Diagonal switch", "cost": 45, "stateful": true, "trunk": "S", "routes": [["S","N"],["S","NE"]], "defaultState": 0 }
+```
+
+In the editor, `R` (or ↻) turns the next piece by that piece's step (45° or 90°; 45° with no piece selected or a train); a rotation the piece does not allow snaps back to the previous valid one. Train facings and vehicle sprites use 8 directions.
+
+**Implementation notes (Stage 8)**: `core/track/geometry` adds a `cubic` route shape walked by arc length (64-sample table, memoized per port pair) and `isDrawableRoute`; `core/track/rotation` holds `canPlaceAt`, `rotationStep` and `snapRotation`, used by the editor actions, level validation, save validation and the UI. Catalog validation rejects undrawable routes. Track atlases add `<piece>_<state>_d` frames drawn at 45° (the renderer adds 90° turns), and vehicles get 8 facings (`core/sim/facing` snaps to 8 sectors). Bridges and tunnels, signals, double slips and slopes are in the backlog.
 
 ### 4.5 Stations
 
@@ -404,6 +414,8 @@ Purchase (fuel is **bought with money** at the level's `economy.fuelPrice` per f
 - A crash **does not fail the level by itself**. The cost is the lost investment: the player must buy new trains. The level fails only if a failure check (4.13) says the objectives are no longer reachable.
 - Future: signals and blocks that prevent collisions automatically.
 
+**Implementation notes (Stage 6)**: `core/sim/collisions.ts` runs at the end of every tick, after all trains have moved, comparing each train's cells before and after the tick (in train order, so it is deterministic). Two trains collide when (a) they end the tick on the same cell and their routes through it share a port — so only different routes of an X crossing are exempt — or (b) they swapped cells head-on (each entered a cell the other held when the tick began). Following a train bumper to bumper is not a collision. The cargo of destroyed trains goes to `run.lost`; the `train_crashed` event carries the trains' ids and locomotives, the cell and the lost cargo, and the UI shows a toast and a placeholder burst (final animation in Stage 7). Running into a stopped or blocked train also destroys both. Lost trains are replaced by buying new ones in Editor Mode, within `editorRules.maxTrains`; the Trains tab lists every train (`n/maxTrains`) with a Scrap button, and the Run Mode panel lists them with Start/Stop.
+
 ### 4.11 Time
 
 - `elapsedTicks` (integer) is the source of truth. `elapsedSeconds = elapsedTicks × TICK_MS / 1000`.
@@ -449,14 +461,14 @@ When a check fails, the level becomes `failed`, the simulation stops, and the re
 
 - **Style**: pixel art. Sprites are authored at native resolution: **1 cell = 20 × 20 px**. Multi-cell objects use multiples (a 2×2 house = 40 × 40 px).
 - **Phaser config**: `pixelArt: true`, `roundPixels: true`, `antialias: false`. Camera zoom uses discrete steps **0.5×, 1×, 2×, 3×, 4×** (integers when ≥ 1) so pixels don't shimmer.
-- **Palette**: one fixed palette for the whole game (≈32 colors, chosen in ADR-002), documented in `docs/art.md`. Catalog `color` values should come from that palette.
-- **Atlases**: one atlas per family (`terrain`, `objects`, `tracks`, `vehicles`, `ui`), exported from Aseprite as PNG + JSON (hash) into `public/assets/atlases/`. Frame naming: `<id>_<variant>` and, for vehicles, `<id>_<facing>`. Only the families listed in `src/data/atlases.json` are loaded, so a missing atlas never causes a 404. `pnpm validate:data` warns about frames that catalogs reference but atlases lack.
+- **Palette**: one fixed palette for the whole game: **ENDESGA 32** (ADR-002), documented in `docs/art.md`. Catalog `color` values should come from that palette (bundled catalogs are checked by a test; modded content may use any color).
+- **Atlases**: one atlas per family (`terrain`, `objects`, `tracks`, `vehicles`, `ui`) as PNG + JSON (hash) in `public/assets/atlases/`. They are **generated from code** by `pnpm art` (sprites in `src/art`, ADR-002) and committed; a test fails if they drift from the code. Hand-made Aseprite exports with the same frame names can replace any family. Frame naming: `<id>_<variant>` and, for vehicles, `<id>_<facing>`. Only the families listed in `src/data/atlases.json` are loaded, so a missing atlas never causes a 404. `pnpm validate:data` warns about frames that catalogs reference but atlases lack.
 - **Terrain variants**: each terrain can have 2–4 variants. The variant per cell is chosen with a **deterministic hash of (x, y)** (no runtime RNG), so the map always looks the same. Transitions/autotiling are in the backlog.
-- **Tracks**: rotating by multiples of 90° at runtime is allowed (it's lossless for pixel art). Stateful pieces have one frame per state.
+- **Tracks**: rotating by multiples of 90° at runtime is allowed (it's lossless for pixel art). Stateful pieces have one frame per state: `<piece>_<state>` (catalog `sprite.prefix`); platforms are `platform_0`.
 - **Vehicles**: one frame per **facing** (4 in the MVP: N, E, S, W; 8 from Stage 8). Vehicles are never rotated by arbitrary angles: on curves, the facing is snapped to the closest direction of the current route segment.
 - **Placeholders**: `render/textureFactory` generates pixel textures at runtime from `render.color`/`shape`. Every catalog entry without `sprite`, or whose frame is missing, still renders (and a dev warning is logged). This lets content and art evolve independently.
-- **Animations** (Stage 7): steam/smoke, station idle animations, crash explosion, switch-flip feedback.
-- **UI**: React UI uses a pixel font (OFL-licensed) for headings and HUD, and `image-rendering: pixelated` for any sprite shown in React (palette icons).
+- **Animations** (Stage 7): steam puffs for locomotives with `render.smoke`, crash explosion (`explosion_0..5`), switch-flip feedback (`switch_marker` plus a lamp on switch frames). Station idle animations are in the backlog. Effects are render-only and never touch the game state.
+- **UI**: React UI uses a pixel font (Pixelify Sans, OFL, self-hosted) for headings, HUD and map labels, and `image-rendering: pixelated` for any sprite shown in React (palette icons come from the atlases, with vector icons as fallback). UI colors are palette tokens.
 - **Licensing**: only original or CC0 assets; each one is recorded in `public/assets/LICENSES.md`.
 
 ---
@@ -1147,7 +1159,7 @@ Feature: Content extensible through JSON
     And a development warning is logged
 ```
 
-### 8.12 Diagonals (future stage)
+### 8.12 Diagonals
 
 ```gherkin
 @s8
@@ -1167,6 +1179,22 @@ Feature: Diagonal tracks
   Scenario: Diagonal crossing through a shared corner
     Given diagonal tracks NE-SW at (10,10) and NW-SE at (11,10)
     Then they do not connect to each other
+
+  Scenario: A 45° curve joins a cardinal line to a diagonal one
+    Given a straight N-S at (5,6), a "curve45" at (5,5) and a diagonal straight at (6,4)
+    When a train runs north through them
+    Then it leaves (5,5) through NE, continues on (6,4), and its sprite faces "NE"
+
+  Scenario: Diagonal switch
+    Given a "switch45" with trunk S in state 1
+    When a train enters from the trunk
+    Then it leaves through NE
+
+  Scenario: Pieces only take the rotations they can draw
+    Given diagonals are enabled
+    Then a "straight" can be placed at 45°
+    And a "curve" (90°) cannot: placement is invalid with reason "Invalid rotation"
+    And pressing R with the "curve" tool turns it 90°, with the "straight" tool 45°
 ```
 
 ---
@@ -1183,10 +1211,11 @@ Each stage ends with a **playable or verifiable demo**, its Definition of Done (
 | **3** ✅ | Persistence | localStorage autosave; restore on load; export/import; migration infrastructure; error handling | @s3 |
 | **4** ✅ | Basic simulation | Fixed-tick loop with events; one one-directional train (loco + wagons) running over straights, curves, switches, wyes, crossings, loops and buffer stops; Run Mode; editor pauses the game; flipping switches; ×1/×2/×4 speeds | @s4 |
 | **5** ✅ | Minimum complete game (**MVP**) | Stations, cargo, production, revenue, fuel consumption and purchase, objectives, stars and score, failure checks and restart, HUD, level menu with progress; 3 tutorial levels (the 2nd one teaches loops) | @s5 |
-| **6** | Multiple trains | Several trains, collisions that destroy trains, buying replacements, bankrupt check, `maxTrains`, train list panel | @s6 |
-| **7** | Pixel-art pass | Final palette (ADR-002) and atlases for terrain, objects, tracks, vehicles (4 facings) and UI; animations (smoke, crash, switch feedback); pixel font; `docs/art.md` | — |
-| **8** | Diagonals | Enable diagonal ports; diagonal straights, 45° curves and diagonal switches; 8-facing vehicle sprites; 45° rotation in the editor | @s8 |
-| 9+ | Evolution (backlog) | Per-train orders/schedules · signals and blocks · rescue locomotive for stranded trains · depots (change wagons) · distance/time-based revenue · running costs · passengers with random demand (seeded RNG) · terrain autotiling · bridges and tunnels · sound · level editor export · offline PWA · advanced accessibility · responsive layout | — |
+| **6** ✅ | Multiple trains | Several trains, collisions that destroy trains, buying replacements, bankrupt check, `maxTrains`, train list panel | @s6 |
+| **7** ✅ | Pixel-art pass | Final palette (ADR-002) and atlases for terrain, objects, tracks, vehicles (4 facings) and UI; animations (smoke, crash, switch feedback); pixel font; `docs/art.md` | — |
+| **7b** ✅ | Responsive & touch | Compact layout for phones and tablets (map first, panels as drawers, collapsed file menu); touch controls: tap = click, one-finger pan when no build tool is active, two-finger pan and pinch zoom in discrete steps; on-map buttons for the keyboard-only actions (rotate, deselect) | @s7b |
+| **8** ✅ | Diagonals | Enable diagonal ports; diagonal straights, 45° curves and diagonal switches; 8-facing vehicle sprites; 45° rotation in the editor | @s8 |
+| 9+ | Evolution (backlog) | Per-train orders/schedules · station idle animations · loaded-wagon sprites · signals and blocks · rescue locomotive for stranded trains · depots (change wagons) · distance/time-based revenue · running costs · passengers with random demand (seeded RNG) · terrain autotiling · bridges and tunnels · sound · level editor export · offline PWA · advanced accessibility | — |
 
 **MVP milestone = end of Stage 5.**
 
@@ -1282,8 +1311,8 @@ Levels after the first are locked until the previous one is completed. Progress 
 8. `trail.length === wagons.length`, and a train's cells are contiguous along the track.
 9. `elapsedTicks` is monotonically increasing and does not change in Editor Mode.
 10. No switch state is out of range of its routes.
-11. No two trains share a cell at the end of a tick (crashes are resolved within the tick).
-12. Only cardinal ports are used while `features.diagonals` is off.
+11. No two trains share a cell at the end of a tick (crashes are resolved within the tick), except on different routes of an X crossing.
+12. Only cardinal ports are used while `features.diagonals` is off; with it on, every placed piece's rotation is one it can draw (§4.4).
 
 ### 12.3 Performance
 
@@ -1326,7 +1355,59 @@ Levels after the first are locked until the previous one is completed. Progress 
 - **Shortcuts**: `R` rotate / flip train facing · `G` grid · `Del` erase · `I` inspect · `Esc` deselect · `Ctrl+Z/Y` undo/redo · `P` play/pause (in Run Mode; `Space` stays reserved for panning) · `Tab` toggle Editor/Run (only when the focus is on the map, so Tab still moves between controls).
 - **Notices** (toasts) for key events: delivery (+money), crash, out of fuel, not enough money.
 - **Accessibility**: React controls are keyboard navigable and have `aria-label`s; color is never the only signal (invalid ghosts also show an ✕ icon and a tooltip).
-- **Desktop only for the MVP**; responsive tablet layout is in the backlog.
+- **Desktop first, playable on phones and tablets** (Stage 7b, §13.1).
+
+### 13.1 Compact layout and touch (Stage 7b)
+
+- **Compact layout** below **900 px** of viewport width: the map takes the whole area between a
+  slim top bar and the status bar. The palette (Editor) or train list (Run) and the inspector open
+  as **drawers** over the map from the top bar ("Build"/"Trains", "Info"), one at a time, and close
+  with ✕, by tapping outside, or (palette) as soon as a tool is picked. The level description is
+  hidden, "Download/Import/Restart" move into a ☰ menu, and the status bar keeps money and zoom.
+- **Touch** (any pointer reported as touch):
+  - A **tap** (≤ 10 px of movement) acts like a click: place/erase with the active tool, inspect,
+    flip a switch, select a train.
+  - **One-finger drag pans** the map when no build tool is active (no tool or Inspect, and always in
+    Run Mode). With a build tool, a drag paints like the mouse does.
+  - **Two fingers** always pan (midpoint) and **pinch zoom** in the discrete zoom steps, anchored at
+    the midpoint; a build stroke in progress stops when the second finger lands.
+- **On-map controls** in the compact layout: the active tool's name, **↻** (rotate the next piece /
+  turn the train, same as `R`) and **✕** (deselect, same as `Esc`).
+- Touch targets are at least 40 × 40 px on coarse pointers; the canvas disables browser panning and
+  zooming (`touch-action: none`).
+
+```gherkin
+@s7b
+Feature: Playing on a phone
+
+  Scenario: The map is visible on a narrow screen
+    Given a viewport 390 px wide
+    When I open a level
+    Then the map fills the width of the screen
+    And the palette and inspector are hidden behind "Build" and "Info" buttons
+
+  Scenario: Pick a tool from the drawer and place it with a tap
+    Given a viewport 390 px wide in Editor Mode
+    When I open "Build" and pick "Straight"
+    Then the drawer closes
+    When I tap a buildable empty cell
+    Then a straight track is placed there
+
+  Scenario: One finger pans when no build tool is active
+    Given no tool is selected
+    When I drag one finger across the map
+    Then the camera moves with it and nothing is built
+
+  Scenario: Pinch to zoom
+    Given two fingers on the map 100 px apart
+    When they move to 150 px apart
+    Then the zoom goes one step up, keeping the point between the fingers in place
+
+  Scenario: Rotate without a keyboard
+    Given the "Curve" tool is active in the compact layout
+    When I press "↻"
+    Then the next piece is rotated 90°
+```
 
 ---
 
@@ -1364,13 +1445,13 @@ Levels after the first are locked until the previous one is completed. Progress 
 | D6 | Diagonals? | Yes, in Stage 8. The 8-port model exists from day 1 (§4.1). |
 | D7 | Art style? | Pixel art, 20 × 20 px per cell, with color placeholders until the art pass (§4.14). |
 | D8 | Language | English for everything; no i18n for now. |
+| D9 | Can wagons be changed on an existing train? (S6) | No: only scrap and rebuy. Depots stay in the backlog (§9). |
+| D10 | Palette and sprite size? (S7) | ENDESGA 32, native 20 × 20 sprites, generated from code (ADR-002). |
+| D11 | Which diagonal pieces? (S8) | Only 45° turns: diagonal straight (straight at 45°), 45° curve, diagonal switch; no sharp corner-to-corner curves (§4.4). |
 
 ### 15.2 Open
 
 1. **S5**: Is revenue a flat amount per unit, or does it depend on distance or delivery time? (MVP: flat.)
 2. **S5**: Do trains have running/maintenance costs over time? (MVP: no.)
 3. **S5**: Passengers: does every passenger station both supply and demand, with origin/destination pairs?
-4. **S6**: Should the player be able to add or remove wagons from an existing train (depot), or only scrap and rebuy?
-5. **S7**: Which 32-color palette? Native 20 × 20 sprites, or 10 × 10 drawn and scaled ×2?
-6. **S8**: Which diagonal pieces do we need: only 45° curves, or also sharper 90° diagonal-to-diagonal curves?
-7. Should a stranded train (out of fuel or blocked) ever be recoverable (rescue locomotive), or only scrapped?
+4. Should a stranded train (out of fuel or blocked) ever be recoverable (rescue locomotive), or only scrapped?

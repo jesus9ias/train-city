@@ -37,7 +37,8 @@ export type EditorState = {
   /** Updates the draft; if the train tool is active it follows the new composition. */
   setTrainDraft: (draft: TrainDraft) => void;
   selectTool: (tool: Tool | null) => void;
-  rotate: () => void;
+  /** Turns the next piece or train by `step` degrees (90 by default, 45 for diagonal pieces). */
+  rotate: (step?: 45 | 90) => void;
   inspect: (cell: Cell | null) => void;
   toggleNetwork: () => void;
   notify: (text: string, tone?: Notice['tone']) => void;
@@ -78,8 +79,9 @@ export function createEditorStore() {
     selectTool: (tool) => {
       set({ tool });
     },
-    rotate: () => {
-      set({ rotation: (get().rotation + 90) % 360 });
+    rotate: (step = 90) => {
+      const rotation = get().rotation;
+      set({ rotation: (rotation - (rotation % step) + step) % 360 });
     },
     inspect: (inspected) => {
       set({ inspected });

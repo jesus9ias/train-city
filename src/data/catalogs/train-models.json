@@ -12,8 +12,14 @@
       "weight": 60,
       "maxWagons": 5,
       "cost": 300,
-      "render": { "color": "#222222" },
-      "sprite": { "atlas": "vehicles", "prefix": "loco_steam" }
+      "render": {
+        "color": "#181425",
+        "smoke": true
+      },
+      "sprite": {
+        "atlas": "vehicles",
+        "prefix": "loco_steam"
+      }
     },
     {
       "id": "loco_diesel",
@@ -26,7 +32,13 @@
       "weight": 50,
       "maxWagons": 8,
       "cost": 500,
-      "render": { "color": "#C8102E" }
+      "render": {
+        "color": "#e43b44"
+      },
+      "sprite": {
+        "atlas": "vehicles",
+        "prefix": "loco_diesel"
+      }
     }
   ],
   "wagons": [
@@ -37,7 +49,13 @@
       "capacity": 40,
       "emptyWeight": 10,
       "cost": 80,
-      "render": { "color": "#2B5DA8" }
+      "render": {
+        "color": "#0099db"
+      },
+      "sprite": {
+        "atlas": "vehicles",
+        "prefix": "wagon_pax"
+      }
     },
     {
       "id": "wagon_hopper",
@@ -46,7 +64,13 @@
       "capacity": 30,
       "emptyWeight": 12,
       "cost": 70,
-      "render": { "color": "#5A4632" }
+      "render": {
+        "color": "#733e39"
+      },
+      "sprite": {
+        "atlas": "vehicles",
+        "prefix": "wagon_hopper"
+      }
     },
     {
       "id": "wagon_tank",
@@ -55,7 +79,13 @@
       "capacity": 25,
       "emptyWeight": 12,
       "cost": 90,
-      "render": { "color": "#444444" }
+      "render": {
+        "color": "#5a6988"
+      },
+      "sprite": {
+        "atlas": "vehicles",
+        "prefix": "wagon_tank"
+      }
     },
     {
       "id": "wagon_box",
@@ -64,7 +94,13 @@
       "capacity": 20,
       "emptyWeight": 10,
       "cost": 60,
-      "render": { "color": "#8C6D3F" }
+      "render": {
+        "color": "#b86f50"
+      },
+      "sprite": {
+        "atlas": "vehicles",
+        "prefix": "wagon_box"
+      }
     }
   ]
 }

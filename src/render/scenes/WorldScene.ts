@@ -13,10 +13,12 @@ import { CameraController } from '../camera/CameraController';
 import { ObjectLayer, TrackLayer } from '../layers/EntityLayers';
 import { GhostLayer } from '../layers/GhostLayer';
 import { NetworkOverlay } from '../layers/NetworkOverlay';
-import { atlasLookup, drawGrid, drawStations } from '../layers/staticLayers';
+import { atlasLookup, drawGrid, drawStations, flashCell } from '../layers/staticLayers';
 import { TerrainLayer } from '../layers/TerrainLayer';
 import { TrainLayer } from '../layers/TrainLayer';
 import { createPlaceholders } from '../textureFactory';
+import type { Cell } from '../../core/grid/coords';
+import { isTap, touchPans, type ScreenPoint } from '../../core/view/gestures';
 
 /** At most this many ticks per frame and per speed step; a longer stall drops the backlog. */
 const MAX_TICKS_PER_FRAME = 8;
@@ -59,17 +61,25 @@ export class WorldScene extends Phaser.Scene {
 
     createPlaceholders(this, catalogs);
     const terrain = new TerrainLayer(this, catalogs, atlases, world);
-    drawStations(this, world);
+    drawStations(this, world, atlases);
     const grid = drawGrid(this, world).setVisible(view.getState().showGrid);
-    const tracks = new TrackLayer(this, catalogs);
+    const tracks = new TrackLayer(this, catalogs, atlases, (cell) => {
+      flashCell(this, atlases, cell);
+    });
     const objects = new ObjectLayer(this, catalogs, atlases);
-    this.trains = new TrainLayer(this, catalogs);
+    this.trains = new TrainLayer(this, catalogs, atlases);
     const network = new NetworkOverlay(this);
     const ghost = new GhostLayer(this, catalogs, atlases, terrain);
     tracks.sync(world.tracks);
     objects.sync(world.objects);
 
-    const camera = new CameraController(this, view, world);
+    const camera = new CameraController(this, view, world, {
+      touchPans: () => {
+        const session = readySession(this.stores);
+        const tool = editor.getState().tool;
+        return touchPans(session?.game.mode ?? 'editing', tool?.kind ?? null);
+      },
+    });
     exposeForTests('cellToCanvas', (cell) => camera.cellToCanvas(cell));
     const controller = createEditorController(this.stores);
 
@@ -93,8 +103,20 @@ export class WorldScene extends Phaser.Scene {
     };
 
     // Pointer input: editor tools, or run-mode clicks (panning gestures belong to the camera).
+    // A touch that may become a pan only acts when it ends as a tap (spec.md §13.1).
     let toolPointerDown = false;
+    let pendingTap: { cell: Cell; at: ScreenPoint } | null = null;
     const onDown = (pointer: Phaser.Input.Pointer) => {
+      // The camera sees the down event first: a second finger is always a camera gesture.
+      if (pointer.wasTouch && camera.multiTouched) {
+        pendingTap = null;
+        return;
+      }
+      if (pointer.wasTouch && camera.isPanGesture(pointer)) {
+        const cell = camera.cellAt(pointer);
+        pendingTap = cell ? { cell, at: { x: pointer.x, y: pointer.y } } : null;
+        return;
+      }
       if (!pointer.leftButtonDown() || camera.isPanGesture(pointer)) return;
       const cell = camera.cellAt(pointer);
       if (!cell) return;
@@ -106,7 +128,14 @@ export class WorldScene extends Phaser.Scene {
       const cell = camera.cellAt(pointer);
       if (cell) controller.drag(cell);
     };
-    const onUp = () => {
+    const onUp = (pointer?: Phaser.Input.Pointer) => {
+      const tap = pendingTap;
+      pendingTap = null;
+      if (tap && pointer && !camera.multiTouched && isTap(tap.at, pointer)) {
+        controller.down(tap.cell);
+        controller.up();
+        return;
+      }
       if (!toolPointerDown) return;
       toolPointerDown = false;
       controller.up();
@@ -183,7 +212,13 @@ export class WorldScene extends Phaser.Scene {
       } else {
         this.accumulator -= ticks * TICK_MS;
       }
-      if (ticks > 0) reportEvents(game.getState().tick(ticks), this.stores, editor);
+      if (ticks > 0) {
+        const events = game.getState().tick(ticks);
+        reportEvents(events, this.stores, editor);
+        for (const event of events) {
+          if (event.type === 'train_crashed') this.trains.crash(event.cell);
+        }
+      }
     }
 
     const current = readySession(this.stores) ?? session;
@@ -213,5 +248,12 @@ function reportEvents(
   for (const event of events) {
     const message = describeEvent(event, session);
     if (message) editor.getState().notify(message.text, message.tone);
+    // A destroyed train can no longer be selected.
+    if (
+      event.type === 'train_crashed' &&
+      event.trains.some((t) => t.id === editor.getState().selectedTrain)
+    ) {
+      editor.getState().selectTrain(null);
+    }
   }
 }

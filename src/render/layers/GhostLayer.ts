@@ -4,12 +4,12 @@ import type { ActionOutcome } from '../../core/editor/actions';
 import type { Cell } from '../../core/grid/coords';
 import { poseIn } from '../../core/sim/facing';
 import { facingFromRotation, layoutTrainFacing } from '../../core/sim/placement';
+import { snapRotation } from '../../core/track/rotation';
 import type { WorldState } from '../../core/world/world';
 import type { Catalogs } from '../../data/schemas/catalogs';
 import type { Tool } from '../../state/editorStore';
 import type { AtlasLookup } from '../sprites';
-import { placeholderKeys, trackTexture } from '../textureFactory';
-import { objectTexture } from './EntityLayers';
+import { objectTexture, placeInCell, trackSprite, vehicleTexture } from './EntityLayers';
 import { DEPTH } from './staticLayers';
 import type { TerrainLayer } from './TerrainLayer';
 
@@ -78,12 +78,21 @@ export class GhostLayer {
   /** Shows the item being placed and returns its footprint in cells. */
   private showItem(tool: Tool, rotation: number, cell: Cell): { w: number; h: number } {
     const place = (key: string, frame?: string) => {
-      this.image.setTexture(key, frame).setPosition(cell.x * CELL_SIZE, cell.y * CELL_SIZE);
-      this.image.setVisible(true);
+      this.image.setTexture(key, frame).setOrigin(0, 0).setAngle(0);
+      this.image.setPosition(cell.x * CELL_SIZE, cell.y * CELL_SIZE).setVisible(true);
     };
     if (tool.kind === 'track') {
       const piece = this.catalogs.pieces[tool.piece];
-      if (piece) place(trackTexture(this.scene, piece, rotation, piece.defaultState ?? 0));
+      if (piece) {
+        const texture = trackSprite(
+          this.scene,
+          piece,
+          this.atlases,
+          snapRotation(piece, rotation),
+          piece.defaultState ?? 0,
+        );
+        placeInCell(this.image, cell, texture).setVisible(true);
+      }
     } else if (tool.kind === 'object') {
       const def = this.catalogs.objects[tool.object];
       const texture = objectTexture(this.catalogs, this.atlases, tool.object, cell.x, cell.y);
@@ -125,10 +134,8 @@ export class GhostLayer {
         image = this.scene.add.image(0, 0, '__DEFAULT').setDepth(DEPTH.ghost).setAlpha(0.8);
         this.vehicles.push(image);
       }
-      image
-        .setTexture(placeholderKeys.vehicle(models[i] ?? '', pose.facing))
-        .setPosition(pose.x, pose.y)
-        .setVisible(true);
+      const texture = vehicleTexture(this.catalogs, this.atlases, models[i] ?? '', pose.facing);
+      image.setTexture(texture.key, texture.frame).setPosition(pose.x, pose.y).setVisible(true);
     });
     this.mark(
       passes.map((p) => p.cell),

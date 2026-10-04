@@ -41,3 +41,24 @@ export function resolveSprite(
   }
   return { key: ref.atlas, frame };
 }
+
+/**
+ * Resolves a prefixed sprite (`<prefix>_<suffix>`, e.g. a vehicle facing or a switch state),
+ * with the same placeholder fallback as `resolveSprite`.
+ */
+export function resolvePrefixed(
+  ref: SpriteRef | undefined,
+  suffix: string,
+  atlases: AtlasLookup,
+  placeholder: TextureRef,
+  onMissing: (key: string, message: string) => void,
+): TextureRef {
+  if (!ref?.prefix) return placeholder;
+  return resolveSprite(
+    { atlas: ref.atlas, frames: [`${ref.prefix}_${suffix}`] },
+    0,
+    atlases,
+    placeholder,
+    onMissing,
+  );
+}

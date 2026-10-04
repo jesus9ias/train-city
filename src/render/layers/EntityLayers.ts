@@ -1,9 +1,11 @@
 import type Phaser from 'phaser';
 import { CELL_SIZE } from '../../core/constants';
 import { variantIndex } from '../../core/grid/variant';
+import type { Cell } from '../../core/grid/coords';
+import type { Facing } from '../../core/sim/facing';
 import { cellKey, type PlacedObject, type PlacedTrack } from '../../core/world/world';
-import type { Catalogs } from '../../data/schemas/catalogs';
-import { resolveSprite, type AtlasLookup, type TextureRef } from '../sprites';
+import type { Catalogs, TrackPieceDef } from '../../data/schemas/catalogs';
+import { resolvePrefixed, resolveSprite, type AtlasLookup, type TextureRef } from '../sprites';
 import { placeholderKeys, trackTexture } from '../textureFactory';
 import { DEPTH, warnMissingSprite } from './staticLayers';
 
@@ -42,23 +44,85 @@ class SyncedImages<T> {
   }
 }
 
+/** A texture plus the rotation to draw it with (atlas frames are authored unrotated). */
+export type PlacedTexture = TextureRef & { readonly angle: number };
+
+/**
+ * Atlas frame `<piece>_<state>` (or `<piece>_<state>_d`, drawn at 45°) turned by the rest of the
+ * track's rotation in 90° steps, or a pre-rotated placeholder.
+ */
+export function trackSprite(
+  scene: Phaser.Scene,
+  piece: TrackPieceDef,
+  atlases: AtlasLookup,
+  rotation: number,
+  state: number,
+): PlacedTexture {
+  const placeholder = { key: placeholderKeys.track(piece.id, rotation, state) };
+  const diagonal = rotation % 90 !== 0;
+  const texture = resolvePrefixed(
+    piece.sprite,
+    diagonal ? `${state}_d` : String(state),
+    atlases,
+    placeholder,
+    warnMissingSprite,
+  );
+  if (texture !== placeholder) return { ...texture, angle: diagonal ? rotation - 45 : rotation };
+  return { key: trackTexture(scene, piece, rotation, state), angle: 0 };
+}
+
+/** Vehicle frame `<model>_<facing>`, or its placeholder. */
+export function vehicleTexture(
+  catalogs: Catalogs,
+  atlases: AtlasLookup,
+  model: string,
+  facing: Facing,
+): TextureRef {
+  const def = catalogs.locomotives[model] ?? catalogs.wagons[model];
+  return resolvePrefixed(
+    def?.sprite,
+    facing,
+    atlases,
+    { key: placeholderKeys.vehicle(model, facing) },
+    warnMissingSprite,
+  );
+}
+
+/** Draws a one-cell texture centered on its cell, rotated as needed. */
+export function placeInCell(image: Phaser.GameObjects.Image, cell: Cell, texture: PlacedTexture) {
+  return image
+    .setTexture(texture.key, texture.frame)
+    .setOrigin(0.5, 0.5)
+    .setPosition((cell.x + 0.5) * CELL_SIZE, (cell.y + 0.5) * CELL_SIZE)
+    .setAngle(texture.angle);
+}
+
 export class TrackLayer {
   private readonly synced: SyncedImages<PlacedTrack>;
 
-  constructor(scene: Phaser.Scene, catalogs: Catalogs) {
+  /** @param onSwitch called when a switch on the map changes state (flip feedback). */
+  constructor(
+    scene: Phaser.Scene,
+    catalogs: Catalogs,
+    atlases: AtlasLookup,
+    private readonly onSwitch: (cell: Cell) => void = () => undefined,
+  ) {
+    const states = new Map<string, number>();
     this.synced = new SyncedImages(
       (track) => cellKey(track.at),
       (track) => {
         const piece = catalogs.pieces[track.piece];
         if (!piece) return null;
-        return scene.add
-          .image(
-            track.at.x * CELL_SIZE,
-            track.at.y * CELL_SIZE,
-            trackTexture(scene, piece, track.rotation, track.state),
-          )
-          .setOrigin(0, 0)
-          .setDepth(DEPTH.tracks);
+        const key = cellKey(track.at);
+        const previous = states.get(key);
+        states.set(key, track.state);
+        if (piece.stateful && previous !== undefined && previous !== track.state) {
+          this.onSwitch(track.at);
+        }
+        const texture = trackSprite(scene, piece, atlases, track.rotation, track.state);
+        return placeInCell(scene.add.image(0, 0, texture.key), track.at, texture).setDepth(
+          DEPTH.tracks,
+        );
       },
     );
   }

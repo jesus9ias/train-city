@@ -1,6 +1,9 @@
+import { scrapRefund } from '../core/editor/actions';
 import type { TrainState } from '../core/sim/train';
 import type { ReadySession } from '../state/gameStore';
+import { trainCount } from '../state/selectors';
 import type { AppStores } from '../state/stores';
+import { formatDelta } from './format';
 
 const STATUS_TEXT: Record<TrainState['status'], string> = {
   stopped: 'Stopped',
@@ -66,31 +69,77 @@ export function TrainPanel({ stores, session, train }: Props) {
   );
 }
 
-/** Run Mode side panel: every train with a start/stop button. */
-export function RunPanel({ stores, session }: { stores: AppStores; session: ReadySession }) {
-  const { catalogs } = session.ctx;
+/** Short cargo summary of a train: `30 t coal, 12 pax passengers` or `empty`. */
+function cargoSummary(train: TrainState, catalogs: ReadySession['ctx']['catalogs']): string {
+  const totals = new Map<string, number>();
+  for (const wagon of train.wagons) {
+    if (wagon.cargo && wagon.amount > 0) {
+      totals.set(wagon.cargo, (totals.get(wagon.cargo) ?? 0) + wagon.amount);
+    }
+  }
+  if (totals.size === 0) return train.wagons.length ? 'empty' : 'no wagons';
+  return [...totals]
+    .map(([id, amount]) => {
+      const cargo = catalogs.cargoTypes[id];
+      return `${Math.floor(amount)} ${cargo?.unit ?? ''} ${cargo?.name.toLowerCase() ?? id}`;
+    })
+    .join(', ');
+}
+
+type ListProps = { stores: AppStores; session: ReadySession };
+
+/**
+ * Every train with its state at a glance. Run Mode starts and stops them; Editor Mode scraps
+ * them (spec.md §6, Stage 6). Clicking a train selects it.
+ */
+export function TrainList({ stores, session, controls }: ListProps & { controls: 'run' | 'edit' }) {
+  const { catalogs, economy } = session.ctx;
   const { trains } = session.game;
+  const editing = controls === 'edit';
+  if (trains.length === 0) {
+    return (
+      <p className="muted" data-testid="no-trains">
+        {editing ? 'No trains yet.' : 'No trains yet. Switch to the Editor to buy one.'}
+      </p>
+    );
+  }
   return (
-    <aside className="side-panel palette" aria-label="Trains">
-      <h2>Trains</h2>
-      {trains.length === 0 ? (
-        <p className="muted">No trains yet. Switch to the Editor to buy one.</p>
-      ) : (
-        <ul className="train-list">
-          {trains.map((train) => (
-            <li key={train.id}>
+    <ul className="train-list" data-testid="train-list">
+      {trains.map((train) => {
+        const loco = catalogs.locomotives[train.locomotive];
+        const name = `${loco?.name ?? train.locomotive} ${train.id}`;
+        const fuel = loco ? Math.round((train.fuel / loco.fuelCapacity) * 100) : 0;
+        return (
+          <li key={train.id}>
+            <button
+              type="button"
+              className="palette__item"
+              aria-label={`Select ${name}`}
+              onClick={() => {
+                stores.editor.getState().selectTrain(train.id);
+              }}
+            >
+              <span className="palette__name">{name}</span>
+              <span className="palette__price">
+                {STATUS_TEXT[train.status]} · ⛽ {fuel}% · {cargoSummary(train, catalogs)}
+              </span>
+            </button>
+            {editing ? (
               <button
                 type="button"
-                className="palette__item"
+                className="tool-button"
+                aria-label={`Scrap ${train.id}`}
+                title={`Scrap for ${formatDelta(scrapRefund(session.game, economy.refundRatio, train))}`}
                 onClick={() => {
-                  stores.editor.getState().selectTrain(train.id);
+                  const outcome = stores.game
+                    .getState()
+                    .execute({ type: 'erase', cell: train.head.cell });
+                  if (!outcome.ok) stores.editor.getState().notify(outcome.reason);
                 }}
               >
-                <span className="palette__name">
-                  {catalogs.locomotives[train.locomotive]?.name ?? train.locomotive} {train.id}
-                </span>
-                <span className="palette__price">{STATUS_TEXT[train.status]}</span>
+                Scrap
               </button>
+            ) : (
               <button
                 type="button"
                 className="tool-button"
@@ -102,11 +151,25 @@ export function RunPanel({ stores, session }: { stores: AppStores; session: Read
               >
                 {train.running ? 'Stop' : 'Start'}
               </button>
-            </li>
-          ))}
-        </ul>
-      )}
-      <p className="palette__hint">Click a switch on the map to flip it.</p>
+            )}
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+/** Run Mode side panel: every train with a start/stop button. */
+export function RunPanel({ stores, session }: ListProps) {
+  return (
+    <aside className="side-panel palette" aria-label="Trains">
+      <h2>
+        Trains <span data-testid="train-count">{trainCount(session)}</span>
+      </h2>
+      <TrainList stores={stores} session={session} controls="run" />
+      <p className="palette__hint">
+        Click or tap a switch on the map to flip it. Trains on the same track crash: both are lost.
+      </p>
     </aside>
   );
 }

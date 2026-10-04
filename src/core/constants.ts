@@ -19,5 +19,6 @@ export const DEFAULT_ZOOM = 1;
 
 /** Feature flags for capabilities that are modelled but not yet enabled. */
 export const FEATURES: { readonly diagonals: boolean } = {
-  diagonals: false,
+  /** Diagonal ports, 45° pieces and 8 vehicle facings (Stage 8). */
+  diagonals: true,
 };

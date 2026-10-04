@@ -1,4 +1,4 @@
 {
   "schemaVersion": 1,
-  "atlases": []
+  "atlases": ["terrain", "objects", "tracks", "vehicles", "ui"]
 }

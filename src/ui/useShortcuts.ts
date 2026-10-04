@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import type { AppStores } from '../state/stores';
+import { rotationStepFor } from '../state/selectors';
 
 const isTyping = (target: EventTarget | null) =>
   target instanceof HTMLElement &&
@@ -34,8 +35,10 @@ export function useShortcuts({ game, editor, view }: AppStores): void {
       // Tab still moves focus between controls; it only switches modes from the map.
       else if (key === 'tab' && !event.shiftKey && isOnMap(event.target)) toggleMode();
       else if (key === 'p') togglePause();
-      else if (key === 'r') editor.getState().rotate();
-      else if (key === 'g') view.getState().toggleGrid();
+      else if (key === 'r') {
+        const { tool, rotate } = editor.getState();
+        rotate(rotationStepFor(tool, game.getState().catalogs));
+      } else if (key === 'g') view.getState().toggleGrid();
       else if (key === 'i') editor.getState().selectTool({ kind: 'inspect' });
       else if (key === 'delete' || key === 'backspace')
         editor.getState().selectTool({ kind: 'erase' });

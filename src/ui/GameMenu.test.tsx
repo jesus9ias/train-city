@@ -85,3 +85,24 @@ describe('GameMenu', () => {
     expect(indicator).toHaveTextContent('✕ Not saved: Storage is full');
   });
 });
+
+describe('GameMenu — compact', () => {
+  it('collapses the file actions behind ☰ and closes after an action', async () => {
+    const actions: GameFileActions = {
+      exportGame: vi.fn(),
+      importFile: vi.fn(() => Promise.resolve({ ok: true as const, value: undefined })),
+      restart: vi.fn(),
+    };
+    render(<GameMenu actions={actions} saveStatus={createSaveStatusStore()} compact />);
+    const menu = screen.getByRole('button', { name: 'Game menu' });
+    expect(screen.queryByRole('button', { name: 'Download game' })).not.toBeInTheDocument();
+    await userEvent.click(menu);
+    expect(menu).toHaveAttribute('aria-expanded', 'true');
+    await userEvent.click(screen.getByRole('button', { name: 'Download game' }));
+    expect(actions.exportGame).toHaveBeenCalled();
+    expect(menu).toHaveAttribute('aria-expanded', 'false');
+    await userEvent.click(menu);
+    await userEvent.click(screen.getByRole('button', { name: 'Restart level' }));
+    expect(screen.getByRole('dialog', { name: 'Restart level?' })).toBeInTheDocument();
+  });
+});

@@ -86,6 +86,37 @@ describe('event messages', () => {
         session,
       ),
     ).toEqual({ text: '+$1,500 delivered at Power Plant', tone: 'info' });
+    expect(
+      describeEvent(
+        {
+          type: 'train_crashed',
+          trains: [
+            { id: 't1', locomotive: 'loco_steam' },
+            { id: 't2', locomotive: 'loco_unknown' },
+          ],
+          cell: { x: 3, y: 4 },
+          lost: { coal: 40, oil: 0 },
+        },
+        session,
+      ),
+    ).toEqual({
+      text: 'Crash! Steam t1 and Train t2 were destroyed (40 t coal lost)',
+      tone: 'error',
+    });
+    expect(
+      describeEvent(
+        {
+          type: 'train_crashed',
+          trains: [
+            { id: 't1', locomotive: 'loco_steam' },
+            { id: 't2', locomotive: 'loco_steam' },
+          ],
+          cell: { x: 3, y: 4 },
+          lost: {},
+        },
+        session,
+      )?.text,
+    ).toBe('Crash! Steam t1 and Steam t2 were destroyed');
     expect(describeEvent({ type: 'level_completed' }, session)).toBeNull();
     expect(describeEvent({ type: 'level_failed', reason: 'x' }, session)).toBeNull();
   });

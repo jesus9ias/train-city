@@ -4,8 +4,11 @@
     {
       "id": "grass",
       "name": "Grass",
-      "color": "#5DA130",
-      "sprite": { "atlas": "terrain", "frames": ["grass_0", "grass_1", "grass_2"] },
+      "color": "#3e8948",
+      "sprite": {
+        "atlas": "terrain",
+        "frames": ["grass_0", "grass_1", "grass_2"]
+      },
       "buildable": true,
       "trackCostMultiplier": 1.0,
       "fuelMultiplier": 1.0,
@@ -14,7 +17,11 @@
     {
       "id": "dirt",
       "name": "Dirt",
-      "color": "#8B6B3E",
+      "color": "#b86f50",
+      "sprite": {
+        "atlas": "terrain",
+        "frames": ["dirt_0", "dirt_1", "dirt_2"]
+      },
       "buildable": true,
       "trackCostMultiplier": 1.0,
       "fuelMultiplier": 1.05,
@@ -23,7 +30,11 @@
     {
       "id": "desert",
       "name": "Desert",
-      "color": "#E3C77A",
+      "color": "#ead4aa",
+      "sprite": {
+        "atlas": "terrain",
+        "frames": ["desert_0", "desert_1", "desert_2"]
+      },
       "buildable": true,
       "trackCostMultiplier": 1.2,
       "fuelMultiplier": 1.15,
@@ -32,7 +43,11 @@
     {
       "id": "snow",
       "name": "Snow",
-      "color": "#F2F6FA",
+      "color": "#ffffff",
+      "sprite": {
+        "atlas": "terrain",
+        "frames": ["snow_0", "snow_1", "snow_2"]
+      },
       "buildable": true,
       "trackCostMultiplier": 1.5,
       "fuelMultiplier": 1.3,
@@ -41,7 +56,11 @@
     {
       "id": "water",
       "name": "Water",
-      "color": "#3B7DD8",
+      "color": "#0099db",
+      "sprite": {
+        "atlas": "terrain",
+        "frames": ["water_0", "water_1", "water_2"]
+      },
       "buildable": false,
       "trackCostMultiplier": 0,
       "fuelMultiplier": 1.0,
