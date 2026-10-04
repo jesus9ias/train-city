@@ -369,6 +369,12 @@ function placeTrain(
 }
 
 /** Scrapping refunds everything in the session it was bought, else part of the vehicles' value. */
+export function scrapRefund(state: GameState, refundRatio: number, train: TrainState): number {
+  return train.placedInSession === state.editorSession
+    ? train.paid
+    : roundMoney(train.purchaseValue * refundRatio);
+}
+
 function scrapTrain(
   state: GameState,
   catalogs: RulesContext['catalogs'],
@@ -376,10 +382,7 @@ function scrapTrain(
   train: TrainState,
 ): ActionOutcome {
   const label = `Scrap ${catalogs.locomotives[train.locomotive]?.name ?? train.locomotive} train`;
-  const refund =
-    train.placedInSession === state.editorSession
-      ? train.paid
-      : roundMoney(train.purchaseValue * refundRatio);
+  const refund = scrapRefund(state, refundRatio, train);
   return {
     ok: true,
     state: {

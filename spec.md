@@ -404,6 +404,8 @@ Purchase (fuel is **bought with money** at the level's `economy.fuelPrice` per f
 - A crash **does not fail the level by itself**. The cost is the lost investment: the player must buy new trains. The level fails only if a failure check (4.13) says the objectives are no longer reachable.
 - Future: signals and blocks that prevent collisions automatically.
 
+**Implementation notes (Stage 6)**: `core/sim/collisions.ts` runs at the end of every tick, after all trains have moved, comparing each train's cells before and after the tick (in train order, so it is deterministic). Two trains collide when (a) they end the tick on the same cell and their routes through it share a port — so only different routes of an X crossing are exempt — or (b) they swapped cells head-on (each entered a cell the other held when the tick began). Following a train bumper to bumper is not a collision. The cargo of destroyed trains goes to `run.lost`; the `train_crashed` event carries the trains' ids and locomotives, the cell and the lost cargo, and the UI shows a toast and a placeholder burst (final animation in Stage 7). Running into a stopped or blocked train also destroys both. Lost trains are replaced by buying new ones in Editor Mode, within `editorRules.maxTrains`; the Trains tab lists every train (`n/maxTrains`) with a Scrap button, and the Run Mode panel lists them with Start/Stop.
+
 ### 4.11 Time
 
 - `elapsedTicks` (integer) is the source of truth. `elapsedSeconds = elapsedTicks × TICK_MS / 1000`.
@@ -1183,7 +1185,7 @@ Each stage ends with a **playable or verifiable demo**, its Definition of Done (
 | **3** ✅ | Persistence | localStorage autosave; restore on load; export/import; migration infrastructure; error handling | @s3 |
 | **4** ✅ | Basic simulation | Fixed-tick loop with events; one one-directional train (loco + wagons) running over straights, curves, switches, wyes, crossings, loops and buffer stops; Run Mode; editor pauses the game; flipping switches; ×1/×2/×4 speeds | @s4 |
 | **5** ✅ | Minimum complete game (**MVP**) | Stations, cargo, production, revenue, fuel consumption and purchase, objectives, stars and score, failure checks and restart, HUD, level menu with progress; 3 tutorial levels (the 2nd one teaches loops) | @s5 |
-| **6** | Multiple trains | Several trains, collisions that destroy trains, buying replacements, bankrupt check, `maxTrains`, train list panel | @s6 |
+| **6** ✅ | Multiple trains | Several trains, collisions that destroy trains, buying replacements, bankrupt check, `maxTrains`, train list panel | @s6 |
 | **7** | Pixel-art pass | Final palette (ADR-002) and atlases for terrain, objects, tracks, vehicles (4 facings) and UI; animations (smoke, crash, switch feedback); pixel font; `docs/art.md` | — |
 | **8** | Diagonals | Enable diagonal ports; diagonal straights, 45° curves and diagonal switches; 8-facing vehicle sprites; 45° rotation in the editor | @s8 |
 | 9+ | Evolution (backlog) | Per-train orders/schedules · signals and blocks · rescue locomotive for stranded trains · depots (change wagons) · distance/time-based revenue · running costs · passengers with random demand (seeded RNG) · terrain autotiling · bridges and tunnels · sound · level editor export · offline PWA · advanced accessibility · responsive layout | — |
@@ -1282,7 +1284,7 @@ Levels after the first are locked until the previous one is completed. Progress 
 8. `trail.length === wagons.length`, and a train's cells are contiguous along the track.
 9. `elapsedTicks` is monotonically increasing and does not change in Editor Mode.
 10. No switch state is out of range of its routes.
-11. No two trains share a cell at the end of a tick (crashes are resolved within the tick).
+11. No two trains share a cell at the end of a tick (crashes are resolved within the tick), except on different routes of an X crossing.
 12. Only cardinal ports are used while `features.diagonals` is off.
 
 ### 12.3 Performance
@@ -1364,13 +1366,13 @@ Levels after the first are locked until the previous one is completed. Progress 
 | D6 | Diagonals? | Yes, in Stage 8. The 8-port model exists from day 1 (§4.1). |
 | D7 | Art style? | Pixel art, 20 × 20 px per cell, with color placeholders until the art pass (§4.14). |
 | D8 | Language | English for everything; no i18n for now. |
+| D9 | Can wagons be changed on an existing train? (S6) | No: only scrap and rebuy. Depots stay in the backlog (§9). |
 
 ### 15.2 Open
 
 1. **S5**: Is revenue a flat amount per unit, or does it depend on distance or delivery time? (MVP: flat.)
 2. **S5**: Do trains have running/maintenance costs over time? (MVP: no.)
 3. **S5**: Passengers: does every passenger station both supply and demand, with origin/destination pairs?
-4. **S6**: Should the player be able to add or remove wagons from an existing train (depot), or only scrap and rebuy?
-5. **S7**: Which 32-color palette? Native 20 × 20 sprites, or 10 × 10 drawn and scaled ×2?
-6. **S8**: Which diagonal pieces do we need: only 45° curves, or also sharper 90° diagonal-to-diagonal curves?
-7. Should a stranded train (out of fuel or blocked) ever be recoverable (rescue locomotive), or only scrapped?
+4. **S7**: Which 32-color palette? Native 20 × 20 sprites, or 10 × 10 drawn and scaled ×2?
+5. **S8**: Which diagonal pieces do we need: only 45° curves, or also sharper 90° diagonal-to-diagonal curves?
+6. Should a stranded train (out of fuel or blocked) ever be recoverable (rescue locomotive), or only scrapped?

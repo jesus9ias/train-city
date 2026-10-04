@@ -7,6 +7,9 @@ move cargo and passengers from A to B efficiently.
 Run and start it: trains stop at every station, unload what it wants (you get paid), load what
 it supplies and refuel where fuel is sold. Meet the level's objectives before time runs out; you
 earn up to 3 stars for being fast, fuel-efficient and cheap. Trains never reverse: build loops.
+Run several trains if the level allows it, but keep them apart: two trains on the same track crash
+and are lost with their cargo. Buy replacements in the Editor (Trains tab, where you can also scrap
+trains); if no train can work and you cannot afford a new one, the level is lost.
 
 - Specification: [spec.md](spec.md)
 - Architecture decisions: [docs/adr](docs/adr)

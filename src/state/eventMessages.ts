@@ -21,6 +21,24 @@ export function describeEvent(
       return { text: `${trainName(event.trainId)} derailed`, tone: 'error' };
     case 'train_out_of_fuel':
       return { text: `${trainName(event.trainId)} ran out of fuel`, tone: 'error' };
+    case 'train_crashed': {
+      // The trains are already gone from the state: name them from the event.
+      const names = event.trains.map(
+        (t) => `${catalogs.locomotives[t.locomotive]?.name ?? 'Train'} ${t.id}`,
+      );
+      const lost = Object.entries(event.lost)
+        .filter(([, amount]) => amount > 0)
+        .map(([cargo, amount]) => {
+          const def = catalogs.cargoTypes[cargo];
+          return [money.format(amount), def?.unit, def?.name.toLowerCase() ?? cargo]
+            .filter(Boolean)
+            .join(' ');
+        });
+      return {
+        text: `Crash! ${names.join(' and ')} were destroyed${lost.length ? ` (${lost.join(', ')} lost)` : ''}`,
+        tone: 'error',
+      };
+    }
     case 'cargo_delivered': {
       const station = session.game.world.stations.find((s) => s.id === event.stationId);
       return {

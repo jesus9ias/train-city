@@ -2,11 +2,13 @@ import { produce, serviceTrain, stopStationFor } from '../cargo/stations';
 import { TICK_SECONDS } from '../constants';
 import { fuelPerUnit } from '../economy/fuel';
 import type { Ledger } from '../economy/ledger';
-import type { GameState, RulesContext, RunState } from '../game/state';
+import type { CargoAmounts, GameState, RulesContext, RunState } from '../game/state';
+import type { Cell } from '../grid/coords';
 import { neighbor, oppositePort } from '../grid/ports';
 import { evaluateOutcome } from '../objectives/objectives';
 import { routeLength } from '../track/geometry';
 import { inBounds, stationAt, terrainAt, trackAt, type WorldState } from '../world/world';
+import { findCollisions } from './collisions';
 import { exitFor } from './routing';
 import type { CellPass, TrainState, TrainStatus } from './train';
 
@@ -18,6 +20,14 @@ export type SimEvent =
   | { readonly type: 'train_blocked'; readonly trainId: string }
   | { readonly type: 'train_derailed'; readonly trainId: string }
   | { readonly type: 'train_out_of_fuel'; readonly trainId: string }
+  | {
+      readonly type: 'train_crashed';
+      /** The destroyed trains (already removed from the state when the event is emitted). */
+      readonly trains: readonly { readonly id: string; readonly locomotive: string }[];
+      readonly cell: Cell;
+      /** Cargo destroyed with them. */
+      readonly lost: CargoAmounts;
+    }
   | {
       readonly type: 'cargo_delivered';
       readonly trainId: string;
@@ -187,10 +197,59 @@ function stepTrain(
   return next;
 }
 
+function addAmounts(amounts: CargoAmounts, extra: CargoAmounts): CargoAmounts {
+  const next: Record<string, number> = { ...amounts };
+  for (const [cargo, amount] of Object.entries(extra)) next[cargo] = (next[cargo] ?? 0) + amount;
+  return next;
+}
+
+/** Cargo carried by a train, by cargo id. */
+function cargoOf(train: TrainState): CargoAmounts {
+  const amounts: Record<string, number> = {};
+  for (const wagon of train.wagons) {
+    if (wagon.cargo && wagon.amount > 0) {
+      amounts[wagon.cargo] = (amounts[wagon.cargo] ?? 0) + wagon.amount;
+    }
+  }
+  return amounts;
+}
+
+/**
+ * Trains that hit each other are destroyed at the end of the tick and their cargo is lost
+ * (spec.md §4.10). Track and stations stay intact; the level only fails through the checks.
+ */
+function resolveCollisions(
+  before: readonly TrainState[],
+  after: readonly TrainState[],
+  shared: TickShared,
+): readonly TrainState[] {
+  const collisions = findCollisions(before, after);
+  if (collisions.length === 0) return after;
+  const destroyed = new Set<string>();
+  for (const { a, b, cell } of collisions) {
+    const victims = [a, b].filter((t) => !destroyed.has(t.id));
+    if (victims.length === 0) continue;
+    let lost: CargoAmounts = {};
+    for (const train of victims) {
+      destroyed.add(train.id);
+      lost = addAmounts(lost, cargoOf(train));
+    }
+    shared.run = { ...shared.run, lost: addAmounts(shared.run.lost, lost) };
+    shared.events.push({
+      type: 'train_crashed',
+      trains: [a, b].map((t) => ({ id: t.id, locomotive: t.locomotive })),
+      cell,
+      lost,
+    });
+  }
+  return after.filter((t) => !destroyed.has(t.id));
+}
+
 /** Advances the simulation by one fixed tick. Pure and deterministic (spec.md §4.8). */
 export function step(state: GameState, ctx: RulesContext): StepResult {
   const shared: TickShared = { run: state.run, ledger: state.ledger, events: [] };
-  const trains = state.trains.map((train) => stepTrain(train, state, ctx, shared));
+  const moved = state.trains.map((train) => stepTrain(train, state, ctx, shared));
+  const trains = resolveCollisions(state.trains, moved, shared);
   const run = produce(shared.run, state.world.stations, TICK_SECONDS);
   let next: GameState = {
     ...state,

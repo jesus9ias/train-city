@@ -1,5 +1,6 @@
 import type Phaser from 'phaser';
 import { CELL_SIZE } from '../../core/constants';
+import { cellCenter, type Cell } from '../../core/grid/coords';
 import { trainPoses } from '../../core/sim/facing';
 import { TICK_SECONDS } from '../../core/constants';
 import type { TrainState } from '../../core/sim/train';
@@ -9,6 +10,9 @@ import { placeholderKeys } from '../textureFactory';
 import { DEPTH } from './staticLayers';
 
 const SELECTED = 0xf2b544;
+/** Placeholder crash burst until the pixel-art pass (Stage 7). */
+const CRASH_COLOR = 0xff6a00;
+const CRASH_MS = 900;
 
 /** Draws trains every frame, interpolating between simulation ticks for smooth motion. */
 export class TrainLayer {
@@ -20,6 +24,23 @@ export class TrainLayer {
     private readonly catalogs: Catalogs,
   ) {
     this.selection = scene.add.graphics().setDepth(DEPTH.trains + 1);
+  }
+
+  /** Flashes an expanding, fading burst where trains crashed. */
+  crash(cell: Cell): void {
+    const { x, y } = cellCenter(cell);
+    const burst = this.scene.add
+      .circle(x, y, CELL_SIZE * 0.6, CRASH_COLOR, 0.9)
+      .setDepth(DEPTH.trains + 2);
+    this.scene.tweens.add({
+      targets: burst,
+      scale: 2.5,
+      alpha: 0,
+      duration: CRASH_MS,
+      onComplete: () => {
+        burst.destroy();
+      },
+    });
   }
 
   /**

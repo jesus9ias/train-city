@@ -1,8 +1,10 @@
 import { useStore } from 'zustand';
 import { roundMoney } from '../core/economy/ledger';
 import type { ReadySession } from '../state/gameStore';
+import { trainCount } from '../state/selectors';
 import type { AppStores } from '../state/stores';
 import { formatMoney } from './format';
+import { TrainList } from './TrainPanel';
 
 type Props = { stores: AppStores; session: ReadySession };
 
@@ -28,6 +30,7 @@ export function TrainBuilder({ stores, session }: Props) {
     loco.cost + wagons.reduce((sum, id) => sum + (catalogs.wagons[id]?.cost ?? 0), 0);
   const fuel = roundMoney(loco.fuelCapacity * economy.fuelPrice);
   const placing = tool?.kind === 'train';
+  const atLimit = rules.maxTrains !== null && session.game.trains.length >= rules.maxTrains;
   const update = (next: { locomotive?: string; wagons?: readonly string[] }) => {
     setTrainDraft({ locomotive: next.locomotive ?? loco.id, wagons: next.wagons ?? wagons });
   };
@@ -101,13 +104,23 @@ export function TrainBuilder({ stores, session }: Props) {
         type="button"
         className="tool-button"
         aria-pressed={placing}
+        disabled={atLimit && !placing}
         onClick={() => {
           selectTool(placing ? null : { kind: 'train', locomotive: loco.id, wagons });
         }}
       >
         Place train
       </button>
-      <p className="palette__hint">Click a track to place it · R turns it around</p>
+      <p className="palette__hint">
+        {atLimit
+          ? 'Train limit reached: scrap a train to buy another'
+          : 'Click a track to place it · R turns it around'}
+      </p>
+
+      <h3 className="train-builder__heading">
+        Your trains <span data-testid="train-count">{trainCount(session)}</span>
+      </h3>
+      <TrainList stores={stores} session={session} controls="edit" />
     </div>
   );
 }

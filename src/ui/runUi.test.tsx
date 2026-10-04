@@ -252,3 +252,61 @@ describe('run shortcuts', () => {
     expect(ready(stores).game.paused).toBe(false);
   });
 });
+
+describe('train list (Stage 6)', () => {
+  function placeAt(stores: AppStores, y: number) {
+    const outcome = stores.game.getState().execute({
+      type: 'placeTrain',
+      cell: at(5, y),
+      locomotive: 'loco_steam',
+      wagons: [],
+      facing: 'N',
+    });
+    if (!outcome.ok) throw new Error(outcome.reason);
+  }
+
+  it('counts trains against the level limit and blocks buying more', async () => {
+    const stores = await storesWith({
+      economy: { initialMoney: 5000, fuelPrice: 0.5 },
+      editorRules: { allowTerrainEdit: true, allowObjectEdit: true, maxTrains: 2 },
+    });
+    const view = () => <TrainBuilder stores={stores} session={ready(stores)} />;
+    const { rerender } = render(view());
+    expect(screen.getByTestId('train-count')).toHaveTextContent('0/2');
+    expect(screen.getByTestId('no-trains')).toHaveTextContent('No trains yet.');
+    placeAt(stores, 2);
+    placeAt(stores, 6);
+    rerender(view());
+    expect(screen.getByTestId('train-count')).toHaveTextContent('2/2');
+    expect(screen.getByRole('button', { name: 'Place train' })).toBeDisabled();
+    expect(screen.getByText(/Train limit reached/)).toBeInTheDocument();
+    expect(screen.getByTestId('train-list')).toHaveTextContent('Stopped · ⛽ 100% · no wagons');
+
+    // Scrapping frees a slot and refunds the train (bought in this editor session: 100%).
+    await userEvent.click(screen.getByRole('button', { name: 'Scrap t1' }));
+    expect(ready(stores).game.trains.map((t) => t.id)).toEqual(['t2']);
+    rerender(view());
+    expect(screen.getByTestId('train-count')).toHaveTextContent('1/2');
+    expect(screen.getByRole('button', { name: 'Place train' })).toBeEnabled();
+  });
+
+  it('shows cargo and only a plain count without a limit', async () => {
+    const stores = await storesWith();
+    placeTrain(stores);
+    stores.game.getState().startRun();
+    render(<RunPanel stores={stores} session={ready(stores)} />);
+    expect(screen.getByTestId('train-count')).toHaveTextContent(/^1$/);
+    expect(screen.getByTestId('train-list')).toHaveTextContent('empty');
+    expect(screen.queryByRole('button', { name: 'Scrap t1' })).not.toBeInTheDocument();
+  });
+
+  it('reports a failed scrap', async () => {
+    const stores = await storesWith();
+    placeTrain(stores);
+    const session = ready(stores);
+    render(<TrainBuilder stores={stores} session={session} />);
+    stores.game.getState().startRun(); // the list still shows Editor buttons from the old render
+    await userEvent.click(screen.getByRole('button', { name: 'Scrap t1' }));
+    expect(stores.editor.getState().notice?.text).toBe('Switch to Editor Mode to build');
+  });
+});

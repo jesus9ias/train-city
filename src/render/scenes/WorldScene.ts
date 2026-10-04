@@ -183,7 +183,13 @@ export class WorldScene extends Phaser.Scene {
       } else {
         this.accumulator -= ticks * TICK_MS;
       }
-      if (ticks > 0) reportEvents(game.getState().tick(ticks), this.stores, editor);
+      if (ticks > 0) {
+        const events = game.getState().tick(ticks);
+        reportEvents(events, this.stores, editor);
+        for (const event of events) {
+          if (event.type === 'train_crashed') this.trains.crash(event.cell);
+        }
+      }
     }
 
     const current = readySession(this.stores) ?? session;
@@ -213,5 +219,12 @@ function reportEvents(
   for (const event of events) {
     const message = describeEvent(event, session);
     if (message) editor.getState().notify(message.text, message.tone);
+    // A destroyed train can no longer be selected.
+    if (
+      event.type === 'train_crashed' &&
+      event.trains.some((t) => t.id === editor.getState().selectedTrain)
+    ) {
+      editor.getState().selectTrain(null);
+    }
   }
 }

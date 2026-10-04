@@ -549,6 +549,11 @@ body,
   cursor: pointer;
 }
 
+.train-builder__heading {
+  margin: 14px 0 6px;
+  font-size: 13px;
+}
+
 .train-builder__total {
   margin: 0 0 6px;
   font-size: 12px;

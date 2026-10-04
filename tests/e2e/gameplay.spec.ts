@@ -117,3 +117,58 @@ test.describe('Gameplay (MVP)', () => {
     await expect(page.getByTestId('supply-coal')).toHaveText('50/100 coal (+10/min)');
   });
 });
+
+test.describe('Multiple trains (Stage 6)', () => {
+  test('two trains crash head-on, then a replacement is bought', async ({ page }) => {
+    await openLevel(page, 'sandbox');
+    // Two locomotives heading towards each other around the north-west corner of the loop.
+    await page.evaluate(() => {
+      const store = window.__TRAINCITY__?.stores.game;
+      if (!store) throw new Error('no store');
+      const buy = (x: number, y: number, facing: 'N' | 'W') => {
+        const outcome = store.getState().execute({
+          type: 'placeTrain',
+          cell: { x, y },
+          locomotive: 'loco_steam',
+          wagons: [],
+          facing,
+        });
+        if (!outcome.ok) throw new Error(outcome.reason);
+      };
+      buy(50, 8, 'N');
+      buy(52, 5, 'W');
+    });
+
+    await page.getByRole('tab', { name: 'Trains' }).click();
+    await expect(page.getByTestId('train-count')).toHaveText('2');
+
+    await page.getByRole('button', { name: 'Run', exact: true }).click();
+    await page.getByRole('button', { name: 'Start t1' }).click();
+    await page.getByRole('button', { name: 'Start t2' }).click();
+
+    await expect(page.getByTestId('toast')).toContainText(
+      'Crash! Steam t1 and Steam t2 were destroyed',
+      { timeout: 15_000 },
+    );
+    await expect(page.getByTestId('train-count')).toHaveText('0');
+    await expect(page.getByTestId('no-trains')).toBeVisible();
+
+    // The level keeps running: back to the editor to buy a new train.
+    await page.getByRole('button', { name: 'Editor', exact: true }).click();
+    await page.getByRole('tab', { name: 'Trains' }).click();
+    await expect(page.getByRole('button', { name: 'Place train' })).toBeEnabled();
+    // The loop is off-screen in the sandbox: buy through the hook (clicks are covered above).
+    await page.evaluate(() => {
+      const outcome = window.__TRAINCITY__?.stores.game.getState().execute({
+        type: 'placeTrain',
+        cell: { x: 50, y: 8 },
+        locomotive: 'loco_steam',
+        wagons: [],
+        facing: 'N',
+      });
+      if (!outcome?.ok) throw new Error('could not buy a replacement');
+    });
+    await expect(page.getByTestId('train-count')).toHaveText('1');
+    await expect(page.getByTestId('train-list')).toContainText('Steam t3');
+  });
+});
