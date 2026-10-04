@@ -17,6 +17,11 @@
       "unlocked": false
     },
     {
+      "id": "level-004",
+      "name": "Two Lines",
+      "unlocked": false
+    },
+    {
       "id": "sandbox",
       "name": "Sandbox",
       "unlocked": true
