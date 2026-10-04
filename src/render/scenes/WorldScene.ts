@@ -13,7 +13,7 @@ import { CameraController } from '../camera/CameraController';
 import { ObjectLayer, TrackLayer } from '../layers/EntityLayers';
 import { GhostLayer } from '../layers/GhostLayer';
 import { NetworkOverlay } from '../layers/NetworkOverlay';
-import { atlasLookup, drawGrid, drawStations } from '../layers/staticLayers';
+import { atlasLookup, drawGrid, drawStations, flashCell } from '../layers/staticLayers';
 import { TerrainLayer } from '../layers/TerrainLayer';
 import { TrainLayer } from '../layers/TrainLayer';
 import { createPlaceholders } from '../textureFactory';
@@ -59,11 +59,13 @@ export class WorldScene extends Phaser.Scene {
 
     createPlaceholders(this, catalogs);
     const terrain = new TerrainLayer(this, catalogs, atlases, world);
-    drawStations(this, world);
+    drawStations(this, world, atlases);
     const grid = drawGrid(this, world).setVisible(view.getState().showGrid);
-    const tracks = new TrackLayer(this, catalogs);
+    const tracks = new TrackLayer(this, catalogs, atlases, (cell) => {
+      flashCell(this, atlases, cell);
+    });
     const objects = new ObjectLayer(this, catalogs, atlases);
-    this.trains = new TrainLayer(this, catalogs);
+    this.trains = new TrainLayer(this, catalogs, atlases);
     const network = new NetworkOverlay(this);
     const ghost = new GhostLayer(this, catalogs, atlases, terrain);
     tracks.sync(world.tracks);

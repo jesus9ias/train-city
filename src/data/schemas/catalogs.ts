@@ -54,7 +54,10 @@ export const locomotiveSchema = z.strictObject({
   weight: positive,
   maxWagons: z.int().min(0),
   cost: nonNegative,
-  render: renderHintSchema.omit({ shape: true }),
+  render: renderHintSchema.omit({ shape: true }).extend({
+    /** Puffs of steam while running (render only). */
+    smoke: z.boolean().optional(),
+  }),
   sprite: spriteRefSchema.optional(),
 });
 

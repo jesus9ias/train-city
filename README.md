@@ -13,6 +13,7 @@ trains); if no train can work and you cannot afford a new one, the level is lost
 
 - Specification: [spec.md](spec.md)
 - Architecture decisions: [docs/adr](docs/adr)
+- Art guide (palette, sprites, atlases): [docs/art.md](docs/art.md)
 
 ## Requirements
 
@@ -34,6 +35,7 @@ trains); if no train can work and you cannot afford a new one, the level is lost
 | `pnpm typecheck`                    | TypeScript, no emit                                                               |
 | `pnpm test` / `pnpm test:watch`     | Unit and integration tests (Vitest)                                               |
 | `pnpm validate:data`                | Validate catalogs, levels and atlas references                                    |
+| `pnpm art`                          | Regenerate the pixel-art atlases from `src/art` (see [docs/art.md](docs/art.md))  |
 | `pnpm test:coverage`                | Unit tests with coverage (≥ 90% required for `src/core`)                          |
 | `pnpm test:e2e`                     | End-to-end tests (Playwright). First run: `pnpm exec playwright install chromium` |
 
@@ -58,12 +60,15 @@ Open a specific level with `?level=<id>` (e.g. http://localhost:5173/?level=sand
 ```
 src/
   core/         pure, deterministic game logic (no React/Phaser/DOM)
+  art/          palette and sprite drawing code; `pnpm art` turns it into atlases
   data/         JSON catalogs and levels, Zod schemas, loader and validation
   state/        Zustand stores shared by React and Phaser
   render/       Phaser game, scenes and the <GameCanvas> bridge
   ui/           React components
   app/          app shell, error boundary, test hook
   lib/          generic helpers (logger)
+scripts/        build-art.ts (atlas generator)
+public/assets/  generated atlases and LICENSES.md
 tests/e2e/      Playwright tests
 docs/adr/       architecture decision records
 ```

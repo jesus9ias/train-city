@@ -1,10 +1,13 @@
 :root {
-  --bg: #1b1d24;
-  --panel: #262934;
-  --panel-border: #3a3e4c;
-  --text: #e8e6df;
-  --text-muted: #9a9cab;
-  --accent: #f2b544;
+  /* ENDESGA 32 palette (ADR-002, docs/art.md). */
+  --bg: #181425;
+  --panel: #262b44;
+  --panel-border: #3a4466;
+  --text: #ffffff;
+  --text-muted: #8b9bb4;
+  --accent: #feae34;
+  --danger: #e43b44;
+  --font-pixel: 'Pixelify Sans', system-ui, sans-serif;
 
   color-scheme: dark;
   font-family: system-ui, sans-serif;
@@ -218,23 +221,23 @@ body,
 }
 
 .icon__cell {
-  fill: #5da130;
+  fill: #63c74d;
 }
 
 .icon__rail {
   fill: none;
-  stroke: #e8e6df;
+  stroke: var(--text);
   stroke-linecap: round;
   stroke-width: 0.16;
 }
 
 .icon__rail--inactive {
-  stroke: #9a9cab;
+  stroke: var(--text-muted);
   stroke-dasharray: 0.12 0.1;
 }
 
 .icon__bumper {
-  fill: #c8102e;
+  fill: #e43b44;
 }
 
 .inspector__facts {
@@ -270,20 +273,20 @@ body,
 }
 
 .swatch--loose {
-  background: #ff9f1c;
+  background: #f77622;
 }
 
 .swatch--dead {
-  border: 2px solid #f85149;
+  border: 2px solid var(--danger);
   border-radius: 50%;
 }
 
 .swatch--unused {
-  border: 2px solid #58a6ff;
+  border: 2px solid #0099db;
 }
 
 .swatch--isolated {
-  border: 2px solid #d2a8ff;
+  border: 2px solid #b55088;
 }
 
 /* ---- Overlays on the game area ---- */
@@ -296,17 +299,17 @@ body,
   font-size: 12px;
   white-space: nowrap;
   pointer-events: none;
-  background: rgb(27 29 36 / 92%);
+  background: rgb(24 20 37 / 92%);
   border: 1px solid var(--panel-border);
   border-radius: 4px;
 }
 
 .cursor-tooltip--ok {
-  border-color: #3fb950;
+  border-color: #63c74d;
 }
 
 .cursor-tooltip--error {
-  border-color: #f85149;
+  border-color: var(--danger);
 }
 
 .toast {
@@ -322,7 +325,7 @@ body,
 }
 
 .toast--error {
-  border-color: #f85149;
+  border-color: var(--danger);
 }
 
 /* ---- Game menu, save status, dialogs ---- */
@@ -342,13 +345,13 @@ body,
 }
 
 .save-indicator--error {
-  color: #f85149;
+  color: var(--danger);
 }
 
 .tool-button--danger {
-  color: #fff;
-  background: #b62324;
-  border-color: #b62324;
+  color: #ffffff;
+  background: #a22633;
+  border-color: #a22633;
 }
 
 .dialog-backdrop {
@@ -372,7 +375,7 @@ body,
 }
 
 .dialog--error {
-  border-color: #f85149;
+  border-color: var(--danger);
 }
 
 .dialog h2 {
@@ -650,4 +653,27 @@ body,
   margin: 4px 0 0;
   padding-left: 16px;
   font-size: 12px;
+}
+
+/* ---- Pixel font for headings and the HUD (spec.md §4.14) ---- */
+
+h1,
+h2,
+h3,
+.top-bar__title,
+.status-bar,
+.mode-bar__clock,
+.dialog h2 {
+  font-family: var(--font-pixel);
+}
+
+img.sprite,
+.sprite {
+  image-rendering: pixelated;
+}
+
+.sprite-icon {
+  display: inline-block;
+  flex: none;
+  background-repeat: no-repeat;
 }

@@ -315,7 +315,9 @@ describe('Feature: Content extensible through JSON', () => {
 
   it('Scenario: Add a new terrain without code', () => {
     const result = rawWith((raw) => {
-      raw.terrains.terrains.push({
+      // A modder's terrain: no sprite and an off-palette color are both allowed.
+      const terrains: unknown[] = raw.terrains.terrains;
+      terrains.push({
         id: 'mud',
         name: 'Mud',
         color: '#5B4A3A',

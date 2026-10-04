@@ -1,4 +1,5 @@
 import type Phaser from 'phaser';
+import { PALETTE } from '../art/palette';
 import { CELL_SIZE } from '../core/constants';
 import { hashString, variantIndex } from '../core/grid/variant';
 import { routePoint, routeShape } from '../core/track/geometry';
@@ -26,15 +27,16 @@ export const placeholderKeys = {
   vehicle: (model: string, facing: Facing) => `ph:vehicle:${model}:${facing}`,
 };
 
-const HEADLIGHT = hexToRgb('#FFE08A');
-const WINDOW = hexToRgb('#9BD3F0');
+// Fixed details use palette colors (ADR-002); bodies come from each catalog entry's color.
+const HEADLIGHT = hexToRgb(PALETTE.yellow);
+const WINDOW = hexToRgb(PALETTE.cyan);
 
-const SLEEPER = hexToRgb('#6B4A2B');
-const RAIL = hexToRgb('#B9BEC5');
-const RAIL_SHADOW = hexToRgb('#4A4F57');
-const RAIL_INACTIVE = hexToRgb('#7D828A');
-const BUMPER = hexToRgb('#C8102E');
-const PLATFORM = hexToRgb('#C9C2B6');
+const SLEEPER = hexToRgb(PALETTE.bark);
+const RAIL = hexToRgb(PALETTE.silver);
+const RAIL_SHADOW = hexToRgb(PALETTE.ink);
+const RAIL_INACTIVE = hexToRgb(PALETTE.slate);
+const BUMPER = hexToRgb(PALETTE.red);
+const PLATFORM = hexToRgb(PALETTE.silver);
 
 type Plot = (x: number, y: number, color: Rgb) => void;
 

@@ -21,7 +21,10 @@ export const spriteRefSchema = z.strictObject({
   atlas: z.enum(ATLAS_FAMILIES),
   /** Explicit frame names; several frames are visual variants. */
   frames: z.array(z.string().min(1)).min(1).optional(),
-  /** Frame name prefix, for sprites with one frame per facing (`<prefix>_<facing>`). */
+  /**
+   * Frame name prefix, for sprites with one frame per facing (`<prefix>_<facing>`, vehicles) or
+   * per switch state (`<prefix>_<state>`, track pieces).
+   */
   prefix: z.string().min(1).optional(),
 });
 

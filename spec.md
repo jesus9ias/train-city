@@ -121,12 +121,13 @@ train-city/
 ├─ docs/
 │  ├─ adr/                     # Architecture Decision Records
 │  └─ art.md                   # pixel-art guide: palette, sizes, naming
-├─ art/                        # source files (.aseprite), not shipped
+├─ scripts/build-art.ts       # `pnpm art`: generates the atlases from src/art
 ├─ public/assets/
 │  ├─ atlases/                 # terrain/objects/tracks/vehicles/ui .png + .json
 │  └─ LICENSES.md              # origin/license of every asset
 ├─ src/
 │  ├─ app/                     # App.tsx, simple routing (menu → level)
+│  ├─ art/                     # palette + sprite drawing code, atlas packer (ADR-002)
 │  ├─ core/
 │  │  ├─ grid/                 # coordinates, ports (8 directions), helpers
 │  │  ├─ track/                # pieces, rotation, routes, geometry, graph
@@ -451,14 +452,14 @@ When a check fails, the level becomes `failed`, the simulation stops, and the re
 
 - **Style**: pixel art. Sprites are authored at native resolution: **1 cell = 20 × 20 px**. Multi-cell objects use multiples (a 2×2 house = 40 × 40 px).
 - **Phaser config**: `pixelArt: true`, `roundPixels: true`, `antialias: false`. Camera zoom uses discrete steps **0.5×, 1×, 2×, 3×, 4×** (integers when ≥ 1) so pixels don't shimmer.
-- **Palette**: one fixed palette for the whole game (≈32 colors, chosen in ADR-002), documented in `docs/art.md`. Catalog `color` values should come from that palette.
-- **Atlases**: one atlas per family (`terrain`, `objects`, `tracks`, `vehicles`, `ui`), exported from Aseprite as PNG + JSON (hash) into `public/assets/atlases/`. Frame naming: `<id>_<variant>` and, for vehicles, `<id>_<facing>`. Only the families listed in `src/data/atlases.json` are loaded, so a missing atlas never causes a 404. `pnpm validate:data` warns about frames that catalogs reference but atlases lack.
+- **Palette**: one fixed palette for the whole game: **ENDESGA 32** (ADR-002), documented in `docs/art.md`. Catalog `color` values should come from that palette (bundled catalogs are checked by a test; modded content may use any color).
+- **Atlases**: one atlas per family (`terrain`, `objects`, `tracks`, `vehicles`, `ui`) as PNG + JSON (hash) in `public/assets/atlases/`. They are **generated from code** by `pnpm art` (sprites in `src/art`, ADR-002) and committed; a test fails if they drift from the code. Hand-made Aseprite exports with the same frame names can replace any family. Frame naming: `<id>_<variant>` and, for vehicles, `<id>_<facing>`. Only the families listed in `src/data/atlases.json` are loaded, so a missing atlas never causes a 404. `pnpm validate:data` warns about frames that catalogs reference but atlases lack.
 - **Terrain variants**: each terrain can have 2–4 variants. The variant per cell is chosen with a **deterministic hash of (x, y)** (no runtime RNG), so the map always looks the same. Transitions/autotiling are in the backlog.
-- **Tracks**: rotating by multiples of 90° at runtime is allowed (it's lossless for pixel art). Stateful pieces have one frame per state.
+- **Tracks**: rotating by multiples of 90° at runtime is allowed (it's lossless for pixel art). Stateful pieces have one frame per state: `<piece>_<state>` (catalog `sprite.prefix`); platforms are `platform_0`.
 - **Vehicles**: one frame per **facing** (4 in the MVP: N, E, S, W; 8 from Stage 8). Vehicles are never rotated by arbitrary angles: on curves, the facing is snapped to the closest direction of the current route segment.
 - **Placeholders**: `render/textureFactory` generates pixel textures at runtime from `render.color`/`shape`. Every catalog entry without `sprite`, or whose frame is missing, still renders (and a dev warning is logged). This lets content and art evolve independently.
-- **Animations** (Stage 7): steam/smoke, station idle animations, crash explosion, switch-flip feedback.
-- **UI**: React UI uses a pixel font (OFL-licensed) for headings and HUD, and `image-rendering: pixelated` for any sprite shown in React (palette icons).
+- **Animations** (Stage 7): steam puffs for locomotives with `render.smoke`, crash explosion (`explosion_0..5`), switch-flip feedback (`switch_marker` plus a lamp on switch frames). Station idle animations are in the backlog. Effects are render-only and never touch the game state.
+- **UI**: React UI uses a pixel font (Pixelify Sans, OFL, self-hosted) for headings, HUD and map labels, and `image-rendering: pixelated` for any sprite shown in React (palette icons come from the atlases, with vector icons as fallback). UI colors are palette tokens.
 - **Licensing**: only original or CC0 assets; each one is recorded in `public/assets/LICENSES.md`.
 
 ---
@@ -1186,9 +1187,9 @@ Each stage ends with a **playable or verifiable demo**, its Definition of Done (
 | **4** ✅ | Basic simulation | Fixed-tick loop with events; one one-directional train (loco + wagons) running over straights, curves, switches, wyes, crossings, loops and buffer stops; Run Mode; editor pauses the game; flipping switches; ×1/×2/×4 speeds | @s4 |
 | **5** ✅ | Minimum complete game (**MVP**) | Stations, cargo, production, revenue, fuel consumption and purchase, objectives, stars and score, failure checks and restart, HUD, level menu with progress; 3 tutorial levels (the 2nd one teaches loops) | @s5 |
 | **6** ✅ | Multiple trains | Several trains, collisions that destroy trains, buying replacements, bankrupt check, `maxTrains`, train list panel | @s6 |
-| **7** | Pixel-art pass | Final palette (ADR-002) and atlases for terrain, objects, tracks, vehicles (4 facings) and UI; animations (smoke, crash, switch feedback); pixel font; `docs/art.md` | — |
+| **7** ✅ | Pixel-art pass | Final palette (ADR-002) and atlases for terrain, objects, tracks, vehicles (4 facings) and UI; animations (smoke, crash, switch feedback); pixel font; `docs/art.md` | — |
 | **8** | Diagonals | Enable diagonal ports; diagonal straights, 45° curves and diagonal switches; 8-facing vehicle sprites; 45° rotation in the editor | @s8 |
-| 9+ | Evolution (backlog) | Per-train orders/schedules · signals and blocks · rescue locomotive for stranded trains · depots (change wagons) · distance/time-based revenue · running costs · passengers with random demand (seeded RNG) · terrain autotiling · bridges and tunnels · sound · level editor export · offline PWA · advanced accessibility · responsive layout | — |
+| 9+ | Evolution (backlog) | Per-train orders/schedules · station idle animations · loaded-wagon sprites · signals and blocks · rescue locomotive for stranded trains · depots (change wagons) · distance/time-based revenue · running costs · passengers with random demand (seeded RNG) · terrain autotiling · bridges and tunnels · sound · level editor export · offline PWA · advanced accessibility · responsive layout | — |
 
 **MVP milestone = end of Stage 5.**
 
@@ -1367,12 +1368,12 @@ Levels after the first are locked until the previous one is completed. Progress 
 | D7 | Art style? | Pixel art, 20 × 20 px per cell, with color placeholders until the art pass (§4.14). |
 | D8 | Language | English for everything; no i18n for now. |
 | D9 | Can wagons be changed on an existing train? (S6) | No: only scrap and rebuy. Depots stay in the backlog (§9). |
+| D10 | Palette and sprite size? (S7) | ENDESGA 32, native 20 × 20 sprites, generated from code (ADR-002). |
 
 ### 15.2 Open
 
 1. **S5**: Is revenue a flat amount per unit, or does it depend on distance or delivery time? (MVP: flat.)
 2. **S5**: Do trains have running/maintenance costs over time? (MVP: no.)
 3. **S5**: Passengers: does every passenger station both supply and demand, with origin/destination pairs?
-4. **S7**: Which 32-color palette? Native 20 × 20 sprites, or 10 × 10 drawn and scaled ×2?
-5. **S8**: Which diagonal pieces do we need: only 45° curves, or also sharper 90° diagonal-to-diagonal curves?
-6. Should a stranded train (out of fuel or blocked) ever be recoverable (rescue locomotive), or only scrapped?
+4. **S8**: Which diagonal pieces do we need: only 45° curves, or also sharper 90° diagonal-to-diagonal curves?
+5. Should a stranded train (out of fuel or blocked) ever be recoverable (rescue locomotive), or only scrapped?

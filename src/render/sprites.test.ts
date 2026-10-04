@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { SpriteRef } from '../data/schemas/common';
 import { hexToRgb, rgbToCss, rgbToNumber, shade } from './color';
-import { resolveSprite, spriteVariantCount, type AtlasLookup } from './sprites';
+import { resolvePrefixed, resolveSprite, spriteVariantCount, type AtlasLookup } from './sprites';
 
 const atlases = (frames: Record<string, string[]>): AtlasLookup => ({
   hasAtlas: (atlas) => atlas in frames,
@@ -59,6 +59,27 @@ describe('Feature: Content extensible through JSON — sprites', () => {
     expect(spriteVariantCount(ref, lookup)).toBe(2);
     expect(spriteVariantCount(ref, atlases({}))).toBe(0);
     expect(spriteVariantCount(undefined, lookup)).toBe(0);
+  });
+});
+
+describe('prefixed sprites (vehicle facings, switch states)', () => {
+  const lookup = atlases({ vehicles: ['loco_steam_N', 'loco_steam_E'] });
+  const ref: SpriteRef = { atlas: 'vehicles', prefix: 'loco_steam' };
+  const fallback = { key: 'ph:vehicle:loco_steam:S' };
+
+  it('resolves <prefix>_<suffix> frames', () => {
+    expect(resolvePrefixed(ref, 'E', lookup, fallback, vi.fn())).toEqual({
+      key: 'vehicles',
+      frame: 'loco_steam_E',
+    });
+  });
+
+  it('falls back when the frame is missing or there is no prefix', () => {
+    const onMissing = vi.fn();
+    expect(resolvePrefixed(ref, 'S', lookup, fallback, onMissing)).toBe(fallback);
+    expect(onMissing).toHaveBeenCalledOnce();
+    expect(resolvePrefixed(undefined, 'S', lookup, fallback, onMissing)).toBe(fallback);
+    expect(resolvePrefixed({ atlas: 'vehicles' }, 'S', lookup, fallback, onMissing)).toBe(fallback);
   });
 });
 

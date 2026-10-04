@@ -1,8 +1,26 @@
 {
   "schemaVersion": 1,
   "pieces": [
-    { "id": "straight", "name": "Straight", "cost": 10, "routes": [["N", "S"]] },
-    { "id": "curve", "name": "Curve", "cost": 12, "routes": [["S", "E"]] },
+    {
+      "id": "straight",
+      "name": "Straight",
+      "cost": 10,
+      "routes": [["N", "S"]],
+      "sprite": {
+        "atlas": "tracks",
+        "prefix": "straight"
+      }
+    },
+    {
+      "id": "curve",
+      "name": "Curve",
+      "cost": 12,
+      "routes": [["S", "E"]],
+      "sprite": {
+        "atlas": "tracks",
+        "prefix": "curve"
+      }
+    },
     {
       "id": "cross",
       "name": "X crossing",
@@ -10,7 +28,11 @@
       "routes": [
         ["N", "S"],
         ["E", "W"]
-      ]
+      ],
+      "sprite": {
+        "atlas": "tracks",
+        "prefix": "cross"
+      }
     },
     {
       "id": "switch",
@@ -22,7 +44,11 @@
         ["S", "N"],
         ["S", "E"]
       ],
-      "defaultState": 0
+      "defaultState": 0,
+      "sprite": {
+        "atlas": "tracks",
+        "prefix": "switch"
+      }
     },
     {
       "id": "wye",
@@ -34,15 +60,32 @@
         ["S", "W"],
         ["S", "E"]
       ],
-      "defaultState": 0
+      "defaultState": 0,
+      "sprite": {
+        "atlas": "tracks",
+        "prefix": "wye"
+      }
     },
-    { "id": "buffer", "name": "Buffer stop", "cost": 8, "routes": [["S", null]] },
+    {
+      "id": "buffer",
+      "name": "Buffer stop",
+      "cost": 8,
+      "routes": [["S", null]],
+      "sprite": {
+        "atlas": "tracks",
+        "prefix": "buffer"
+      }
+    },
     {
       "id": "station_track",
       "name": "Platform track",
       "cost": 15,
       "routes": [["N", "S"]],
-      "isStation": true
+      "isStation": true,
+      "sprite": {
+        "atlas": "tracks",
+        "prefix": "station_track"
+      }
     }
   ]
 }
