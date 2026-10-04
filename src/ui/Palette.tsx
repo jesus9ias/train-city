@@ -137,7 +137,21 @@ export function Palette({ stores, session }: Props) {
           ))}
         </ul>
       )}
-      {activeTab === 'tracks' && <p className="palette__hint">Rotation {rotation}° — press R</p>}
+      {activeTab === 'tracks' && (
+        <p className="palette__hint palette__rotation">
+          Rotation {rotation}° — press R or{' '}
+          <button
+            type="button"
+            className="tool-button"
+            aria-label="Rotate piece"
+            onClick={() => {
+              stores.editor.getState().rotate();
+            }}
+          >
+            ↻
+          </button>
+        </p>
+      )}
     </aside>
   );
 }

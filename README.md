@@ -41,7 +41,7 @@ trains); if no train can work and you cannot afford a new one, the level is lost
 
 Open a specific level with `?level=<id>` (e.g. http://localhost:5173/?level=sandbox).
 
-## Controls (so far)
+## Controls
 
 | Input                                      | Action                                  |
 | ------------------------------------------ | --------------------------------------- |
@@ -54,6 +54,16 @@ Open a specific level with `?level=<id>` (e.g. http://localhost:5173/?level=sand
 | `G`                                        | Toggle grid                             |
 | `Tab` (with the map focused) / `P`         | Switch Editor ⇄ Run / play-pause in Run |
 | Click a switch / a train in Run Mode       | Flip the switch / show the train panel  |
+
+On phones and tablets (narrow screens) the map fills the screen: open the palette with **Build**
+(or **Trains** in Run Mode) and the inspector with **Info**; file actions live under **☰**.
+
+| Touch                                   | Action                                                |
+| --------------------------------------- | ----------------------------------------------------- |
+| Tap                                     | Same as a click (place, erase, inspect, flip, select) |
+| One-finger drag, no build tool selected | Pan (with a build tool it paints, like the mouse)     |
+| Two-finger drag / pinch                 | Pan / zoom in steps                                   |
+| ↻ / ✕ over the map                      | Rotate the next piece or turn the train / deselect    |
 
 ## Project layout
 

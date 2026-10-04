@@ -168,7 +168,7 @@ export function RunPanel({ stores, session }: ListProps) {
       </h2>
       <TrainList stores={stores} session={session} controls="run" />
       <p className="palette__hint">
-        Click a switch on the map to flip it. Trains on the same track crash: both are lost.
+        Click or tap a switch on the map to flip it. Trains on the same track crash: both are lost.
       </p>
     </aside>
   );

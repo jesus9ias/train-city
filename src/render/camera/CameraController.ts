@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { CELL_SIZE } from '../../core/constants';
 import { pixelToCell } from '../../core/grid/coords';
 import { clampScroll } from '../../core/view/camera';
+import { distance, midpoint, pinchStep, type ScreenPoint } from '../../core/view/gestures';
 import { anchoredScroll, stepZoom } from '../../core/view/zoom';
 import type { ViewStore } from '../../state/viewStore';
 
@@ -9,6 +10,11 @@ import type { ViewStore } from '../../state/viewStore';
 const CAMERA_MARGIN_CELLS = 2;
 
 type MapSize = { readonly widthPx: number; readonly heightPx: number };
+
+export type CameraOptions = {
+  /** Whether a single finger pans right now (no build tool active, spec.md §13.1). */
+  readonly touchPans: () => boolean;
+};
 
 /**
  * Pan, zoom and hover tracking for a scene's main camera. Zoom is mirrored in the view store so
@@ -18,13 +24,18 @@ export class CameraController {
   private readonly camera: Phaser.Cameras.Scene2D.Camera;
   private readonly spaceKey: Phaser.Input.Keyboard.Key | undefined;
   private readonly disposers: (() => void)[] = [];
+  /** Two-finger gesture in progress: finger distance and midpoint at the last update. */
+  private pinch: { distance: number; mid: ScreenPoint } | null = null;
+  private multiTouch = false;
 
   constructor(
     private readonly scene: Phaser.Scene,
     private readonly view: ViewStore,
     private readonly map: MapSize,
+    private readonly options: CameraOptions = { touchPans: () => false },
   ) {
     this.camera = scene.cameras.main;
+    scene.input.addPointer(1); // two fingers
     this.camera.setZoom(view.getState().zoom);
     this.camera.centerOn(map.widthPx / 2, map.heightPx / 2);
     this.clamp();
@@ -48,11 +59,22 @@ export class CameraController {
     this.disposers.length = 0;
   }
 
-  /** Middle-button drag, or Space + left drag. Tools must ignore these pointer events. */
+  /**
+   * Middle-button drag, Space + left drag, any two-finger gesture, or one finger when no build
+   * tool is active. Tools must ignore these pointer events.
+   */
   isPanGesture(pointer: Phaser.Input.Pointer): boolean {
     return (
-      pointer.middleButtonDown() || (this.spaceKey?.isDown === true && pointer.leftButtonDown())
+      pointer.middleButtonDown() ||
+      (this.spaceKey?.isDown === true && pointer.leftButtonDown()) ||
+      this.pinch !== null ||
+      (pointer.wasTouch && this.options.touchPans())
     );
+  }
+
+  /** True when a second finger touched the map since the first one went down. */
+  get multiTouched(): boolean {
+    return this.multiTouch;
   }
 
   /** World cell under a pointer, or null outside the map. */
@@ -94,8 +116,23 @@ export class CameraController {
   private listenToPointer(): void {
     const { scene, camera, view } = this;
 
+    const touches = () =>
+      [scene.input.pointer1, scene.input.pointer2].filter((p) => p.isDown && p.wasTouch);
+    const onDown = (pointer: Phaser.Input.Pointer) => {
+      if (!pointer.wasTouch) return;
+      this.multiTouch = touches().length > 1;
+      view.getState().setHoverCell(this.cellAt(pointer));
+    };
+    const onUp = () => {
+      if (touches().length < 2) this.pinch = null;
+    };
     const onMove = (pointer: Phaser.Input.Pointer) => {
-      if (this.isPanGesture(pointer)) {
+      const [a, b] = touches();
+      if (a && b) {
+        this.twoFingers({ x: a.x, y: a.y }, { x: b.x, y: b.y });
+        return;
+      }
+      if (pointer.isDown && this.isPanGesture(pointer)) {
         camera.scrollX -= (pointer.x - pointer.prevPosition.x) / camera.zoom;
         camera.scrollY -= (pointer.y - pointer.prevPosition.y) / camera.zoom;
         this.clamp();
@@ -110,14 +147,38 @@ export class CameraController {
       this.zoomTo(stepZoom(camera.zoom, dy > 0 ? -1 : 1), pointer.x, pointer.y);
     };
 
+    scene.input.on('pointerdown', onDown);
+    scene.input.on('pointerup', onUp);
+    scene.input.on('pointerupoutside', onUp);
     scene.input.on('pointermove', onMove);
     scene.input.on('gameout', onOut);
     scene.input.on('wheel', onWheel);
     this.disposers.push(() => {
+      scene.input.off('pointerdown', onDown);
+      scene.input.off('pointerup', onUp);
+      scene.input.off('pointerupoutside', onUp);
       scene.input.off('pointermove', onMove);
       scene.input.off('gameout', onOut);
       scene.input.off('wheel', onWheel);
     });
+  }
+
+  /** Two fingers: the midpoint pans, spreading or closing them steps the zoom. */
+  private twoFingers(a: ScreenPoint, b: ScreenPoint): void {
+    const { camera } = this;
+    const mid = midpoint(a, b);
+    const spread = distance(a, b);
+    this.multiTouch = true;
+    if (!this.pinch) {
+      this.pinch = { distance: spread, mid };
+      return;
+    }
+    camera.scrollX -= (mid.x - this.pinch.mid.x) / camera.zoom;
+    camera.scrollY -= (mid.y - this.pinch.mid.y) / camera.zoom;
+    this.clamp();
+    const step = pinchStep(this.pinch.distance, spread);
+    if (step !== 0) this.zoomTo(stepZoom(camera.zoom, step), mid.x, mid.y);
+    this.pinch = { distance: step !== 0 ? spread : this.pinch.distance, mid };
   }
 
   /** Keeps the world point at the viewport center fixed when the canvas is resized. */

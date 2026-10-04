@@ -114,7 +114,7 @@ export function TrainBuilder({ stores, session }: Props) {
       <p className="palette__hint">
         {atLimit
           ? 'Train limit reached: scrap a train to buy another'
-          : 'Click a track to place it · R turns it around'}
+          : 'Click a track to place it · R or ↻ on the map turns it around'}
       </p>
 
       <h3 className="train-builder__heading">

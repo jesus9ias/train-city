@@ -677,3 +677,169 @@ img.sprite,
   flex: none;
   background-repeat: no-repeat;
 }
+
+/* ---- Compact layout: phones and tablets (spec.md §13.1) ---- */
+
+.game-menu__actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.game-menu__actions[hidden] {
+  display: none;
+}
+
+.palette__rotation .tool-button {
+  padding: 0 8px;
+}
+
+.map-controls {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 4px 4px 10px;
+  background: rgb(24 20 37 / 85%);
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+}
+
+.map-controls__tool {
+  font-family: var(--font-pixel);
+}
+
+.app--compact .top-bar {
+  gap: 6px;
+  padding: 6px 8px;
+}
+
+.app--compact .top-bar__title {
+  font-size: 14px;
+}
+
+.app--compact .top-bar__subtitle,
+.app--compact [data-testid='hover-cell'],
+.app--compact [data-testid='build-cost'] {
+  display: none;
+}
+
+.top-bar__drawers {
+  display: flex;
+  gap: 6px;
+}
+
+.app--compact .game-menu {
+  position: relative;
+}
+
+.app--compact .game-menu__actions {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 20;
+  flex-direction: column;
+  align-items: stretch;
+  min-width: 180px;
+  padding: 8px;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+}
+
+.app--compact .app__body {
+  position: relative;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.app--compact .drawer {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 10;
+  display: flex;
+  width: min(320px, 88vw);
+  box-shadow: 0 0 24px rgb(0 0 0 / 50%);
+}
+
+.app--compact .drawer[hidden] {
+  display: none;
+}
+
+.app--compact .drawer--left {
+  left: 0;
+}
+
+.app--compact .drawer--right {
+  right: 0;
+}
+
+.app--compact .drawer > .side-panel {
+  flex: 1;
+  width: auto;
+  min-width: 0;
+}
+
+.drawer__close {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 1;
+}
+
+.drawer-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 9;
+  padding: 0;
+  background: rgb(24 20 37 / 45%);
+  border: 0;
+}
+
+.app--compact .status-bar {
+  gap: 8px;
+  padding: 4px 8px;
+}
+
+/* The map owns touch gestures; elsewhere avoid double-tap zoom delays. */
+.game-canvas,
+.game-canvas canvas {
+  touch-action: none;
+}
+
+body {
+  touch-action: manipulation;
+}
+
+@media (pointer: coarse) {
+  .tool-button,
+  .palette__item,
+  .palette__tabs button,
+  .status-bar button,
+  .mode-bar button,
+  .top-bar select {
+    min-height: 40px;
+  }
+
+  .tool-button,
+  .status-bar button {
+    min-width: 40px;
+  }
+}
+
+/* Keep the label for screen readers, hide it visually. */
+.app--compact .level-picker__label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.app--compact .drawer > .side-panel {
+  padding-top: 56px;
+}

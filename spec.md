@@ -1188,8 +1188,9 @@ Each stage ends with a **playable or verifiable demo**, its Definition of Done (
 | **5** ✅ | Minimum complete game (**MVP**) | Stations, cargo, production, revenue, fuel consumption and purchase, objectives, stars and score, failure checks and restart, HUD, level menu with progress; 3 tutorial levels (the 2nd one teaches loops) | @s5 |
 | **6** ✅ | Multiple trains | Several trains, collisions that destroy trains, buying replacements, bankrupt check, `maxTrains`, train list panel | @s6 |
 | **7** ✅ | Pixel-art pass | Final palette (ADR-002) and atlases for terrain, objects, tracks, vehicles (4 facings) and UI; animations (smoke, crash, switch feedback); pixel font; `docs/art.md` | — |
+| **7b** ✅ | Responsive & touch | Compact layout for phones and tablets (map first, panels as drawers, collapsed file menu); touch controls: tap = click, one-finger pan when no build tool is active, two-finger pan and pinch zoom in discrete steps; on-map buttons for the keyboard-only actions (rotate, deselect) | @s7b |
 | **8** | Diagonals | Enable diagonal ports; diagonal straights, 45° curves and diagonal switches; 8-facing vehicle sprites; 45° rotation in the editor | @s8 |
-| 9+ | Evolution (backlog) | Per-train orders/schedules · station idle animations · loaded-wagon sprites · signals and blocks · rescue locomotive for stranded trains · depots (change wagons) · distance/time-based revenue · running costs · passengers with random demand (seeded RNG) · terrain autotiling · bridges and tunnels · sound · level editor export · offline PWA · advanced accessibility · responsive layout | — |
+| 9+ | Evolution (backlog) | Per-train orders/schedules · station idle animations · loaded-wagon sprites · signals and blocks · rescue locomotive for stranded trains · depots (change wagons) · distance/time-based revenue · running costs · passengers with random demand (seeded RNG) · terrain autotiling · bridges and tunnels · sound · level editor export · offline PWA · advanced accessibility | — |
 
 **MVP milestone = end of Stage 5.**
 
@@ -1329,7 +1330,59 @@ Levels after the first are locked until the previous one is completed. Progress 
 - **Shortcuts**: `R` rotate / flip train facing · `G` grid · `Del` erase · `I` inspect · `Esc` deselect · `Ctrl+Z/Y` undo/redo · `P` play/pause (in Run Mode; `Space` stays reserved for panning) · `Tab` toggle Editor/Run (only when the focus is on the map, so Tab still moves between controls).
 - **Notices** (toasts) for key events: delivery (+money), crash, out of fuel, not enough money.
 - **Accessibility**: React controls are keyboard navigable and have `aria-label`s; color is never the only signal (invalid ghosts also show an ✕ icon and a tooltip).
-- **Desktop only for the MVP**; responsive tablet layout is in the backlog.
+- **Desktop first, playable on phones and tablets** (Stage 7b, §13.1).
+
+### 13.1 Compact layout and touch (Stage 7b)
+
+- **Compact layout** below **900 px** of viewport width: the map takes the whole area between a
+  slim top bar and the status bar. The palette (Editor) or train list (Run) and the inspector open
+  as **drawers** over the map from the top bar ("Build"/"Trains", "Info"), one at a time, and close
+  with ✕, by tapping outside, or (palette) as soon as a tool is picked. The level description is
+  hidden, "Download/Import/Restart" move into a ☰ menu, and the status bar keeps money and zoom.
+- **Touch** (any pointer reported as touch):
+  - A **tap** (≤ 10 px of movement) acts like a click: place/erase with the active tool, inspect,
+    flip a switch, select a train.
+  - **One-finger drag pans** the map when no build tool is active (no tool or Inspect, and always in
+    Run Mode). With a build tool, a drag paints like the mouse does.
+  - **Two fingers** always pan (midpoint) and **pinch zoom** in the discrete zoom steps, anchored at
+    the midpoint; a build stroke in progress stops when the second finger lands.
+- **On-map controls** in the compact layout: the active tool's name, **↻** (rotate the next piece /
+  turn the train, same as `R`) and **✕** (deselect, same as `Esc`).
+- Touch targets are at least 40 × 40 px on coarse pointers; the canvas disables browser panning and
+  zooming (`touch-action: none`).
+
+```gherkin
+@s7b
+Feature: Playing on a phone
+
+  Scenario: The map is visible on a narrow screen
+    Given a viewport 390 px wide
+    When I open a level
+    Then the map fills the width of the screen
+    And the palette and inspector are hidden behind "Build" and "Info" buttons
+
+  Scenario: Pick a tool from the drawer and place it with a tap
+    Given a viewport 390 px wide in Editor Mode
+    When I open "Build" and pick "Straight"
+    Then the drawer closes
+    When I tap a buildable empty cell
+    Then a straight track is placed there
+
+  Scenario: One finger pans when no build tool is active
+    Given no tool is selected
+    When I drag one finger across the map
+    Then the camera moves with it and nothing is built
+
+  Scenario: Pinch to zoom
+    Given two fingers on the map 100 px apart
+    When they move to 150 px apart
+    Then the zoom goes one step up, keeping the point between the fingers in place
+
+  Scenario: Rotate without a keyboard
+    Given the "Curve" tool is active in the compact layout
+    When I press "↻"
+    Then the next piece is rotated 90°
+```
 
 ---
 

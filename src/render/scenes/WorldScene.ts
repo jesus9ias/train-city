@@ -17,6 +17,8 @@ import { atlasLookup, drawGrid, drawStations, flashCell } from '../layers/static
 import { TerrainLayer } from '../layers/TerrainLayer';
 import { TrainLayer } from '../layers/TrainLayer';
 import { createPlaceholders } from '../textureFactory';
+import type { Cell } from '../../core/grid/coords';
+import { isTap, touchPans, type ScreenPoint } from '../../core/view/gestures';
 
 /** At most this many ticks per frame and per speed step; a longer stall drops the backlog. */
 const MAX_TICKS_PER_FRAME = 8;
@@ -71,7 +73,13 @@ export class WorldScene extends Phaser.Scene {
     tracks.sync(world.tracks);
     objects.sync(world.objects);
 
-    const camera = new CameraController(this, view, world);
+    const camera = new CameraController(this, view, world, {
+      touchPans: () => {
+        const session = readySession(this.stores);
+        const tool = editor.getState().tool;
+        return touchPans(session?.game.mode ?? 'editing', tool?.kind ?? null);
+      },
+    });
     exposeForTests('cellToCanvas', (cell) => camera.cellToCanvas(cell));
     const controller = createEditorController(this.stores);
 
@@ -95,8 +103,20 @@ export class WorldScene extends Phaser.Scene {
     };
 
     // Pointer input: editor tools, or run-mode clicks (panning gestures belong to the camera).
+    // A touch that may become a pan only acts when it ends as a tap (spec.md §13.1).
     let toolPointerDown = false;
+    let pendingTap: { cell: Cell; at: ScreenPoint } | null = null;
     const onDown = (pointer: Phaser.Input.Pointer) => {
+      // The camera sees the down event first: a second finger is always a camera gesture.
+      if (pointer.wasTouch && camera.multiTouched) {
+        pendingTap = null;
+        return;
+      }
+      if (pointer.wasTouch && camera.isPanGesture(pointer)) {
+        const cell = camera.cellAt(pointer);
+        pendingTap = cell ? { cell, at: { x: pointer.x, y: pointer.y } } : null;
+        return;
+      }
       if (!pointer.leftButtonDown() || camera.isPanGesture(pointer)) return;
       const cell = camera.cellAt(pointer);
       if (!cell) return;
@@ -108,7 +128,14 @@ export class WorldScene extends Phaser.Scene {
       const cell = camera.cellAt(pointer);
       if (cell) controller.drag(cell);
     };
-    const onUp = () => {
+    const onUp = (pointer?: Phaser.Input.Pointer) => {
+      const tap = pendingTap;
+      pendingTap = null;
+      if (tap && pointer && !camera.multiTouched && isTap(tap.at, pointer)) {
+        controller.down(tap.cell);
+        controller.up();
+        return;
+      }
       if (!toolPointerDown) return;
       toolPointerDown = false;
       controller.up();
