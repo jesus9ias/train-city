@@ -1,0 +1,159 @@
+{
+  "schemaVersion": 1,
+  "id": "level-004",
+  "name": "Two Lines",
+  "description": "Two jobs, two trains: haul coal east and carry passengers south. Their lines cross; on a crossing, trains on different lines never crash.",
+  "map": {
+    "widthPx": 1000,
+    "heightPx": 1000,
+    "defaultTerrain": "grass",
+    "terrainPatches": [
+      { "terrain": "water", "rect": { "x": 6, "y": 34, "w": 24, "h": 12 } },
+      { "terrain": "dirt", "rect": { "x": 5, "y": 27, "w": 5, "h": 3 } },
+      { "terrain": "desert", "rect": { "x": 40, "y": 26, "w": 6, "h": 4 } },
+      { "terrain": "dirt", "rect": { "x": 11, "y": 2, "w": 7, "h": 2 } },
+      { "terrain": "dirt", "rect": { "x": 36, "y": 43, "w": 7, "h": 2 } }
+    ],
+    "objects": [
+      { "type": "mine", "at": { "x": 6, "y": 27 }, "locked": true },
+      { "type": "power_plant", "at": { "x": 41, "y": 26 }, "locked": true },
+      { "type": "house_s", "at": { "x": 11, "y": 2 }, "locked": true },
+      { "type": "house_s", "at": { "x": 16, "y": 2 }, "locked": true },
+      { "type": "house_s", "at": { "x": 36, "y": 43 }, "locked": true },
+      { "type": "house_s", "at": { "x": 41, "y": 43 }, "locked": true },
+      { "type": "tree_pine", "at": { "x": 3, "y": 6 } },
+      { "type": "tree_oak", "at": { "x": 7, "y": 12 } },
+      { "type": "tree_pine", "at": { "x": 24, "y": 4 } },
+      { "type": "tree_oak", "at": { "x": 31, "y": 8 } },
+      { "type": "tree_pine", "at": { "x": 40, "y": 5 } },
+      { "type": "tree_oak", "at": { "x": 45, "y": 14 } },
+      { "type": "tree_pine", "at": { "x": 12, "y": 20 } },
+      { "type": "tree_oak", "at": { "x": 5, "y": 22 } },
+      { "type": "tree_pine", "at": { "x": 33, "y": 18 } },
+      { "type": "tree_oak", "at": { "x": 44, "y": 36 } },
+      { "type": "tree_pine", "at": { "x": 33, "y": 37 } },
+      { "type": "tree_oak", "at": { "x": 3, "y": 40 } },
+      { "type": "tree_pine", "at": { "x": 20, "y": 47 } },
+      { "type": "rock", "at": { "x": 20, "y": 25 } },
+      { "type": "rock", "at": { "x": 28, "y": 32 } }
+    ],
+    "tracks": [
+      { "at": { "x": 6, "y": 30 }, "piece": "station_track", "rotation": 90, "locked": true },
+      { "at": { "x": 7, "y": 30 }, "piece": "station_track", "rotation": 90, "locked": true },
+      { "at": { "x": 8, "y": 30 }, "piece": "station_track", "rotation": 90, "locked": true },
+      { "at": { "x": 40, "y": 30 }, "piece": "station_track", "rotation": 90, "locked": true },
+      { "at": { "x": 41, "y": 30 }, "piece": "station_track", "rotation": 90, "locked": true },
+      { "at": { "x": 42, "y": 30 }, "piece": "station_track", "rotation": 90, "locked": true },
+      { "at": { "x": 14, "y": 4 }, "piece": "station_track", "rotation": 0, "locked": true },
+      { "at": { "x": 14, "y": 5 }, "piece": "station_track", "rotation": 0, "locked": true },
+      { "at": { "x": 14, "y": 6 }, "piece": "station_track", "rotation": 0, "locked": true },
+      { "at": { "x": 39, "y": 40 }, "piece": "station_track", "rotation": 0, "locked": true },
+      { "at": { "x": 39, "y": 41 }, "piece": "station_track", "rotation": 0, "locked": true },
+      { "at": { "x": 39, "y": 42 }, "piece": "station_track", "rotation": 0, "locked": true }
+    ],
+    "stations": [
+      {
+        "id": "st_mine",
+        "name": "West Mine",
+        "cells": [
+          { "x": 6, "y": 30 },
+          { "x": 7, "y": 30 },
+          { "x": 8, "y": 30 }
+        ],
+        "supplies": [{ "cargo": "coal", "ratePerMinute": 10, "capacity": 90, "initial": 60 }],
+        "dwellSeconds": 3,
+        "locked": true
+      },
+      {
+        "id": "st_plant",
+        "name": "East Power Plant",
+        "cells": [
+          { "x": 40, "y": 30 },
+          { "x": 41, "y": 30 },
+          { "x": 42, "y": 30 }
+        ],
+        "demands": [{ "cargo": "coal" }],
+        "dwellSeconds": 3,
+        "locked": true
+      },
+      {
+        "id": "st_north",
+        "name": "Northfield",
+        "cells": [
+          { "x": 14, "y": 4 },
+          { "x": 14, "y": 5 },
+          { "x": 14, "y": 6 }
+        ],
+        "supplies": [
+          { "cargo": "passengers", "ratePerMinute": 20, "capacity": 120, "initial": 80 }
+        ],
+        "dwellSeconds": 3,
+        "locked": true
+      },
+      {
+        "id": "st_south",
+        "name": "Southgate",
+        "cells": [
+          { "x": 39, "y": 40 },
+          { "x": 39, "y": 41 },
+          { "x": 39, "y": 42 }
+        ],
+        "demands": [{ "cargo": "passengers" }],
+        "dwellSeconds": 3,
+        "locked": true
+      }
+    ]
+  },
+  "editorRules": {
+    "allowTerrainEdit": false,
+    "allowObjectEdit": true,
+    "allowedPieces": [
+      "straight",
+      "curve",
+      "curve45",
+      "cross",
+      "cross45",
+      "switch",
+      "switch_left",
+      "wye",
+      "buffer",
+      "station_track"
+    ],
+    "allowedLocomotives": ["loco_steam", "loco_diesel"],
+    "allowedWagons": ["wagon_hopper", "wagon_pax"],
+    "maxTrains": 3
+  },
+  "economy": {
+    "initialMoney": 3000,
+    "fuelPrice": 0.5,
+    "refundRatio": 0.5,
+    "payOverrides": { "coal": 20, "passengers": 15 }
+  },
+  "objectives": [
+    {
+      "id": "o1",
+      "type": "deliver",
+      "cargo": "coal",
+      "amount": 60,
+      "to": "st_plant",
+      "from": "st_mine"
+    },
+    {
+      "id": "o2",
+      "type": "deliver",
+      "cargo": "passengers",
+      "amount": 80,
+      "to": "st_south",
+      "from": "st_north"
+    }
+  ],
+  "constraints": { "timeLimitSeconds": 600 },
+  "scoring": {
+    "stars": [
+      { "stars": 3, "maxSeconds": 60, "maxFuel": 250, "maxBuildCost": 1700 },
+      { "stars": 2, "maxSeconds": 180, "maxFuel": 400, "maxBuildCost": 2300 },
+      { "stars": 1 }
+    ]
+  },
+  "seed": 4
+}

@@ -21,21 +21,21 @@ const range = (from: number, to: number) =>
 const row = (y: number, xs: number[]): Track[] => xs.map((x) => [x, y, 'straight', 90]);
 const column = (x: number, ys: number[]): Track[] => ys.map((y) => [x, y, 'straight', 0]);
 
-type Solution = {
-  tracks: Track[];
-  train: { cell: [number, number]; facing: Port; locomotive: string; wagons: string[] };
-};
+type Train = { cell: [number, number]; facing: Port; locomotive: string; wagons: string[] };
+type Solution = { tracks: Track[]; trains: Train[] };
 
 const SOLUTIONS: Record<string, Solution> = {
   // Mine (10,8–10) → south → east along y=38 → Power Plant (40–42,38).
   'level-001': {
     tracks: [...column(10, range(11, 37)), [10, 38, 'curve', 270], ...row(38, range(11, 39))],
-    train: {
-      cell: [10, 10],
-      facing: 'S',
-      locomotive: 'loco_steam',
-      wagons: ['wagon_hopper', 'wagon_hopper'],
-    },
+    trains: [
+      {
+        cell: [10, 10],
+        facing: 'S',
+        locomotive: 'loco_steam',
+        wagons: ['wagon_hopper', 'wagon_hopper'],
+      },
+    ],
   },
   // A clockwise loop around the lake through both towns.
   'level-002': {
@@ -49,12 +49,14 @@ const SOLUTIONS: Record<string, Solution> = {
       ...column(8, [...range(11, 19), ...range(23, 31)]),
       ...column(41, [...range(11, 19), ...range(23, 31)]),
     ],
-    train: {
-      cell: [8, 20],
-      facing: 'N',
-      locomotive: 'loco_diesel',
-      wagons: ['wagon_pax', 'wagon_pax'],
-    },
+    trains: [
+      {
+        cell: [8, 20],
+        facing: 'N',
+        locomotive: 'loco_diesel',
+        wagons: ['wagon_pax', 'wagon_pax'],
+      },
+    ],
   },
   // One line, a reversing loop (switch + 5 cells) at each dead end.
   'level-003': {
@@ -77,12 +79,42 @@ const SOLUTIONS: Record<string, Solution> = {
       [36, 27, 'curve', 270],
       [36, 26, 'straight', 0],
     ],
-    train: {
-      cell: [8, 25],
-      facing: 'W',
-      locomotive: 'loco_steam',
-      wagons: ['wagon_hopper', 'wagon_hopper', 'wagon_hopper'],
-    },
+    trains: [
+      {
+        cell: [8, 25],
+        facing: 'W',
+        locomotive: 'loco_steam',
+        wagons: ['wagon_hopper', 'wagon_hopper', 'wagon_hopper'],
+      },
+    ],
+  },
+  // Two trains on lines that meet at a 45° crossing: coal east along y=30, passengers down
+  // a diagonal from Northfield to Southgate.
+  'level-004': {
+    tracks: [
+      ...row(30, [...range(9, 36), 38, 39]),
+      [37, 30, 'cross45', 90],
+      [14, 7, 'curve45', 315],
+      ...range(15, 38)
+        .filter((x) => x !== 37)
+        .map((x): Track => [x, x - 7, 'straight', 135]),
+      [39, 32, 'curve45', 135],
+      ...column(39, range(33, 39)),
+    ],
+    trains: [
+      {
+        cell: [8, 30],
+        facing: 'E',
+        locomotive: 'loco_steam',
+        wagons: ['wagon_hopper', 'wagon_hopper'],
+      },
+      {
+        cell: [14, 6],
+        facing: 'S',
+        locomotive: 'loco_steam',
+        wagons: ['wagon_pax', 'wagon_pax'],
+      },
+    ],
   },
 };
 
@@ -98,13 +130,13 @@ async function play(levelId: string): Promise<GameState> {
       piece,
       rotation,
     })),
-    {
+    ...solution.trains.map((train): EditorAction => ({
       type: 'placeTrain',
-      cell: { x: solution.train.cell[0], y: solution.train.cell[1] },
-      locomotive: solution.train.locomotive,
-      wagons: solution.train.wagons,
-      facing: solution.train.facing,
-    },
+      cell: { x: train.cell[0], y: train.cell[1] },
+      locomotive: train.locomotive,
+      wagons: train.wagons,
+      facing: train.facing,
+    })),
   ];
   let game = createGameState(level, testCatalogs);
   for (const action of actions) {
@@ -112,10 +144,14 @@ async function play(levelId: string): Promise<GameState> {
     if (!outcome.ok) throw new Error(`${JSON.stringify(action)}: ${outcome.reason}`);
     game = outcome.state;
   }
-  const started = setTrainRunning(enterRunMode(game), 't1', true);
-  if (!started.ok) throw new Error(started.reason);
+  let running = enterRunMode(game);
+  for (const train of running.trains) {
+    const started = setTrainRunning(running, train.id, true);
+    if (!started.ok) throw new Error(started.reason);
+    running = started.state;
+  }
   const limit = level.constraints.timeLimitSeconds ?? 900;
-  return advance(started.state, ctx, Math.ceil(limit / TICK_SECONDS) + 1).state;
+  return advance(running, ctx, Math.ceil(limit / TICK_SECONDS) + 1).state;
 }
 
 describe('golden runs: every tutorial level can be won', () => {
@@ -125,6 +161,8 @@ describe('golden runs: every tutorial level can be won', () => {
     expect(outcome, JSON.stringify(outcome)).toMatchObject({ kind: 'completed' });
     expect(outcome?.kind === 'completed' && outcome.stars).toBeGreaterThanOrEqual(2);
     expect(moneyOf(done)).toBeGreaterThan(0);
+    // No train was lost on the way (e.g. where two lines cross).
+    expect(done.trains).toHaveLength(SOLUTIONS[levelId]?.trains.length ?? 0);
     // A good solution should pay for itself: tutorials reward efficient play with profit.
     expect(outcome?.kind === 'completed' && outcome.score).toBeGreaterThan(0);
   });

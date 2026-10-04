@@ -1209,13 +1209,20 @@ Feature: Diagonal tracks
     Then a "straight" can be placed at 45°
     And a "curve" (90°) cannot: placement is invalid with reason "Invalid rotation"
     And pressing R with the "curve" tool turns it 90°, with the "straight" tool 45°
+
+  Scenario: The fourth tutorial needs two trains and a diagonal
+    Given level "level-004" with its reference solution: a coal line along y=30 and a passenger
+      line running diagonally from Northfield to Southgate across a "cross45"
+    When both trains run at the same time
+    Then the level is completed with at least 2 stars and a positive profit
+    And no train crashes where the two lines cross
 ```
 
 ---
 
 ## 9. Stages (roadmap)
 
-Each stage ends with a **playable or verifiable demo**, its Definition of Done (§11) met, and a `v0.<stage>.0` tag.
+Each stage ends with a **playable or verifiable demo**, its Definition of Done (§11) met, and a `v0.<stage>.0` tag (Stage 7b, an extra stage, is `v0.7.1`).
 
 | Stage | Name | Deliverable | Gherkin |
 |---|---|---|---|
@@ -1233,13 +1240,16 @@ Each stage ends with a **playable or verifiable demo**, its Definition of Done (
 
 **MVP milestone = end of Stage 5.**
 
-**Tutorial levels (Stage 5)** — each one has a reference solution in `src/test/golden.test.ts` that must win it (≥ 2 stars, positive profit):
+**Tutorial levels (Stages 5–8)** — each one has a reference solution in `src/test/golden.test.ts` that must win it (≥ 2 stars, positive profit):
 
 | Level | Teaches | Reference result |
 |---|---|---|
 | `level-001` First Run | Lay track, buy a train with wagons, deliver | ★★★ in 0:35, profit $218 |
 | `level-002` Round Trip | Trains never reverse: a circuit serving two towns (passengers both ways) | ★★★ in 3:04, profit $505 |
 | `level-003` Dead End Port | Switches: a reversing loop at each dead end of a single line | ★★★ in 5:04, profit $510 |
+| `level-004` Two Lines | Several trains (`maxTrains: 3`) and diagonals: one train per job, a diagonal line that crosses the other one on a 45° crossing | ★★★ in 0:28, profit $346 |
+
+`level-004` was added after Stage 8 (2026-10-04), so the tutorials also cover Stages 6 and 8.
 
 Levels after the first are locked until the previous one is completed. Progress (`traincity:v1:progress`) keeps the best stars and the best score separately.
 
