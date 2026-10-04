@@ -282,9 +282,15 @@ Each piece has **routes**: pairs of ports a train can traverse. A **stateful** p
 **Diagonals (Stage 8).** A route is *drawable* when it is one of: opposite ports (straight: 1 unit cardinal, √2 diagonal); a port and a dead end; a 90° curve between two cardinal ports (quarter circle); or a **45° turn** between a cardinal port and a corner three steps away (e.g. `S → NE`, drawn as a tangent-continuous cubic curve, length ≈ 1.17 units). Sharp 90° curves between two corners are not used (D11). A piece may be placed at a rotation when every rotated route is drawable; platform tracks only in 90° steps. So the straight, the X crossing and the buffer stop rotate in 45° steps (a straight at 45° *is* the diagonal straight), the 90° curve, switch and wye in 90° steps, and two new pieces cover the rest:
 
 ```json
-{ "id": "curve45",  "name": "45° curve",       "cost": 12, "routes": [["S","NE"]] },
-{ "id": "switch45", "name": "Diagonal switch", "cost": 45, "stateful": true, "trunk": "S", "routes": [["S","N"],["S","NE"]], "defaultState": 0 }
+{ "id": "curve45",       "name": "45° curve",               "cost": 12, "routes": [["S","NE"]] },
+{ "id": "switch_left",   "name": "Switch (left)",           "cost": 40, "stateful": true, "trunk": "S", "routes": [["S","N"],["S","W"]],  "defaultState": 0 },
+{ "id": "switch45",      "name": "Diagonal switch (right)", "cost": 45, "stateful": true, "trunk": "S", "routes": [["S","N"],["S","NE"]], "defaultState": 0 },
+{ "id": "switch45_left", "name": "Diagonal switch (left)",  "cost": 45, "stateful": true, "trunk": "S", "routes": [["S","N"],["S","NW"]], "defaultState": 0 },
+{ "id": "wye45",         "name": "45° wye",                 "cost": 45, "stateful": true, "trunk": "S", "routes": [["S","NW"],["S","NE"]], "defaultState": 0 },
+{ "id": "cross45",       "name": "45° crossing",            "cost": 30, "routes": [["N","S"],["NE","SW"]] }
 ```
+
+Rotation never changes a switch's hand, so each switch comes as a right and a left piece (the original `switch` is shown as "Switch (right)"). **Coverage rule** (D12), checked by a test over the bundled catalog: from every heading a train can go straight or turn 45° either way (and 90° either way from a cardinal heading); a switch can branch to either side, and a wye split both ways, from every heading; and any two lines can cross (cardinal × cardinal, diagonal × diagonal, cardinal × diagonal).
 
 In the editor, `R` (or ↻) turns the next piece by that piece's step (45° or 90°; 45° with no piece selected or a train); a rotation the piece does not allow snaps back to the previous valid one. Train facings and vehicle sprites use 8 directions.
 
@@ -1190,6 +1196,14 @@ Feature: Diagonal tracks
     When a train enters from the trunk
     Then it leaves through NE
 
+  Scenario: Every turn, branch and crossing is buildable
+    Given the bundled track catalog with diagonals enabled
+    Then from each of the 8 headings there is a piece to go straight and to turn 45° left and right
+    And from each cardinal heading there are pieces to turn 90° left and right
+    And from each heading there is a switch branching left, one branching right, and a wye
+    And a cardinal line can cross another cardinal line, a diagonal line can cross a diagonal
+      line, and a cardinal line can cross a diagonal one
+
   Scenario: Pieces only take the rotations they can draw
     Given diagonals are enabled
     Then a "straight" can be placed at 45°
@@ -1447,6 +1461,7 @@ Feature: Playing on a phone
 | D8 | Language | English for everything; no i18n for now. |
 | D9 | Can wagons be changed on an existing train? (S6) | No: only scrap and rebuy. Depots stay in the backlog (§9). |
 | D10 | Palette and sprite size? (S7) | ENDESGA 32, native 20 × 20 sprites, generated from code (ADR-002). |
+| D12 | Missing junctions found after Stage 8 (2026-10-04) | Add left-hand switches, a 45° wye and a cardinal × diagonal crossing; a coverage test keeps the catalog complete (§4.4). |
 | D11 | Which diagonal pieces? (S8) | Only 45° turns: diagonal straight (straight at 45°), 45° curve, diagonal switch; no sharp corner-to-corner curves (§4.4). |
 
 ### 15.2 Open

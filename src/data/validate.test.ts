@@ -11,6 +11,9 @@ import {
   type Result,
 } from './validate';
 
+/** Pieces in the bundled catalog: test pieces appended to it start at this index. */
+const PIECES = RAW_CATALOGS.trackPieces.pieces.length;
+
 const catalogs = (() => {
   const result = validateCatalogs(RAW_CATALOGS);
   if (!result.ok) throw new Error('bundled catalogs are invalid');
@@ -348,9 +351,9 @@ describe('Feature: Content extensible through JSON', () => {
       );
     });
     const issues = issuesOf(result);
-    expect(issues.some((i) => i.includes('pieces[9]'))).toBe(false);
+    expect(issues.some((i) => i.includes(`pieces[${PIECES}]`))).toBe(false);
     expect(issues).toContain(
-      'track-pieces.json: pieces[10].routes[0]: this route cannot be drawn (see spec §4.4)',
+      `track-pieces.json: pieces[${PIECES + 1}].routes[0]: this route cannot be drawn (see spec §4.4)`,
     );
   });
 
@@ -392,11 +395,11 @@ describe('Feature: Content extensible through JSON', () => {
     });
     expect(issuesOf(result)).toEqual([
       'objects.json: objects[0].allowedTerrains[0]: unknown terrain "lava"',
-      'track-pieces.json: pieces[9].routes[0]: a route needs two different ports',
-      'track-pieces.json: pieces[10].trunk: stateful pieces need a trunk port',
-      'track-pieces.json: pieces[11].routes: every route must include the trunk "W"',
-      'track-pieces.json: pieces[11].routes: stateful pieces need at least two routes',
-      'track-pieces.json: pieces[11].defaultState: defaultState is out of range',
+      `track-pieces.json: pieces[${PIECES}].routes[0]: a route needs two different ports`,
+      `track-pieces.json: pieces[${PIECES + 1}].trunk: stateful pieces need a trunk port`,
+      `track-pieces.json: pieces[${PIECES + 2}].routes: every route must include the trunk "W"`,
+      `track-pieces.json: pieces[${PIECES + 2}].routes: stateful pieces need at least two routes`,
+      `track-pieces.json: pieces[${PIECES + 2}].defaultState: defaultState is out of range`,
       'train-models.json: wagons[0].accepts[0]: unknown cargo "unobtainium"',
     ]);
   });

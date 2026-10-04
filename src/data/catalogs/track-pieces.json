@@ -45,8 +45,21 @@
       }
     },
     {
+      "id": "cross45",
+      "name": "45° crossing",
+      "cost": 30,
+      "routes": [
+        ["N", "S"],
+        ["NE", "SW"]
+      ],
+      "sprite": {
+        "atlas": "tracks",
+        "prefix": "cross45"
+      }
+    },
+    {
       "id": "switch",
-      "name": "Switch",
+      "name": "Switch (right)",
       "cost": 40,
       "stateful": true,
       "trunk": "S",
@@ -61,8 +74,24 @@
       }
     },
     {
+      "id": "switch_left",
+      "name": "Switch (left)",
+      "cost": 40,
+      "stateful": true,
+      "trunk": "S",
+      "routes": [
+        ["S", "N"],
+        ["S", "W"]
+      ],
+      "defaultState": 0,
+      "sprite": {
+        "atlas": "tracks",
+        "prefix": "switch_left"
+      }
+    },
+    {
       "id": "switch45",
-      "name": "Diagonal switch",
+      "name": "Diagonal switch (right)",
       "cost": 45,
       "stateful": true,
       "trunk": "S",
@@ -74,6 +103,22 @@
       "sprite": {
         "atlas": "tracks",
         "prefix": "switch45"
+      }
+    },
+    {
+      "id": "switch45_left",
+      "name": "Diagonal switch (left)",
+      "cost": 45,
+      "stateful": true,
+      "trunk": "S",
+      "routes": [
+        ["S", "N"],
+        ["S", "NW"]
+      ],
+      "defaultState": 0,
+      "sprite": {
+        "atlas": "tracks",
+        "prefix": "switch45_left"
       }
     },
     {
@@ -90,6 +135,22 @@
       "sprite": {
         "atlas": "tracks",
         "prefix": "wye"
+      }
+    },
+    {
+      "id": "wye45",
+      "name": "45° wye",
+      "cost": 45,
+      "stateful": true,
+      "trunk": "S",
+      "routes": [
+        ["S", "NW"],
+        ["S", "NE"]
+      ],
+      "defaultState": 0,
+      "sprite": {
+        "atlas": "tracks",
+        "prefix": "wye45"
       }
     },
     {

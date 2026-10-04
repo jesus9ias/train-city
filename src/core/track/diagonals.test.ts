@@ -149,6 +149,60 @@ describe('Feature: Diagonal tracks', () => {
     expect(exitFor(sw, 45, 1, 'SW')).toBe('E');
   });
 
+  it('left-hand switches, the 45° wye and the 45° crossing route as their names say', () => {
+    expect(exitFor(pieceOf('switch_left'), 0, 0, 'S')).toBe('N');
+    expect(exitFor(pieceOf('switch_left'), 0, 1, 'S')).toBe('W');
+    expect(exitFor(pieceOf('switch45_left'), 0, 1, 'S')).toBe('NW');
+    expect(exitFor(pieceOf('switch45_left'), 45, 1, 'SW')).toBe('N');
+    expect(exitFor(pieceOf('wye45'), 0, 0, 'S')).toBe('NW');
+    expect(exitFor(pieceOf('wye45'), 0, 1, 'S')).toBe('NE');
+    // A crossing keeps each train on its own line.
+    expect(exitFor(pieceOf('cross45'), 0, 0, 'S')).toBe('N');
+    expect(exitFor(pieceOf('cross45'), 0, 0, 'SW')).toBe('NE');
+    expect(rotationStep(pieceOf('switch_left'))).toBe(90);
+    expect(rotationStep(pieceOf('switch45_left'))).toBe(45);
+    expect(rotationStep(pieceOf('wye45'))).toBe(45);
+    expect(rotationStep(pieceOf('cross45'))).toBe(45);
+  });
+
+  it('a diagonal line crosses a vertical one through a 45° crossing without crashing', () => {
+    // Vertical line x=10 (y=2..18) and a NE diagonal through (10,10), crossing there.
+    const tracks: TrackInput[] = [];
+    for (let i = 2; i <= 18; i++) {
+      if (i !== 10) tracks.push({ at: at(10, i), piece: 'straight', rotation: 0 });
+      if (i !== 10) tracks.push({ at: at(i, 20 - i), piece: 'straight', rotation: 45 });
+    }
+    tracks.push({ at: at(10, 10), piece: 'cross45', rotation: 0 });
+    const { state, ctx } = game(tracks);
+    let current = state;
+    // Both locomotives head for the crossing, each on its own line.
+    for (const [cell, facing] of [
+      [at(10, 14), 'N'],
+      [at(6, 14), 'NE'],
+    ] as const) {
+      const placed = applyAction(current, ctx, {
+        type: 'placeTrain',
+        cell,
+        locomotive: 'loco_steam',
+        wagons: [],
+        facing,
+      });
+      if (!placed.ok) throw new Error(placed.reason);
+      current = placed.state;
+    }
+    current = enterRunMode(current);
+    for (const id of ['t1', 't2']) {
+      const started = setTrainRunning(current, id, true);
+      if (!started.ok) throw new Error(started.reason);
+      current = started.state;
+    }
+    const { state: after, events } = advance(current, ctx, 100);
+    expect(events.filter((e) => e.type === 'train_crashed')).toEqual([]);
+    expect(after.trains.map((t) => t.status)).toEqual(['running', 'running']);
+    expect(after.trains[0]?.head.cell.x).toBe(10); // still on the vertical line
+    expect(after.trains[1]?.head.cell.x).toBeGreaterThan(10); // past the crossing, NE-bound
+  });
+
   it('Scenario: Pieces only take the rotations they can draw', () => {
     const { state, ctx } = game([]);
     const place = (piece: string, rotation: number) =>
