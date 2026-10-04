@@ -61,11 +61,13 @@ function TerrainVector({ terrain }: { terrain: TerrainDef }) {
 export function TrackIcon({ piece, rotation = 0 }: { piece: TrackPieceDef; rotation?: number }) {
   const fallback = <TrackVector piece={piece} rotation={rotation} />;
   if (!piece.sprite?.prefix) return fallback;
+  // Diagonal rotations use the frame drawn at 45° (pixel art never turns by 45° in CSS).
+  const diagonal = rotation % 90 !== 0;
   return (
     <SpriteIcon
       atlas={piece.sprite.atlas}
-      frame={`${piece.sprite.prefix}_${piece.defaultState ?? 0}`}
-      rotation={rotation}
+      frame={`${piece.sprite.prefix}_${piece.defaultState ?? 0}${diagonal ? '_d' : ''}`}
+      rotation={diagonal ? rotation - 45 : rotation}
       fallback={fallback}
     />
   );

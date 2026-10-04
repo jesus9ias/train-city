@@ -1,17 +1,24 @@
-import { CELL_SIZE } from '../constants';
+import { CELL_SIZE, FEATURES } from '../constants';
 import { routeLength, routePoint, routeShape } from '../track/geometry';
 import type { CellPass, TrainState } from './train';
 
-/** Sprite facings available in the MVP (8 with diagonals in Stage 8). */
-export type Facing = 'N' | 'E' | 'S' | 'W';
+/** Sprite facings: the 4 cardinal ones, plus the diagonals from Stage 8 (spec.md §4.14). */
+export type Facing = 'N' | 'NE' | 'E' | 'SE' | 'S' | 'SW' | 'W' | 'NW';
 
 /** Where a vehicle is drawn: world pixels of its center, and the facing of its sprite. */
 export type VehiclePose = { readonly x: number; readonly y: number; readonly facing: Facing };
 
-/** Snaps a direction vector to the closest facing. */
-export function facingOf(dx: number, dy: number): Facing {
-  if (Math.abs(dx) > Math.abs(dy)) return dx > 0 ? 'E' : 'W';
-  return dy > 0 ? 'S' : 'N';
+/** Clockwise from east, in 45° sectors (screen y grows downwards). */
+const SECTORS: readonly Facing[] = ['E', 'SE', 'S', 'SW', 'W', 'NW', 'N', 'NE'];
+
+/** Snaps a direction vector to the closest facing (8 with diagonals, else 4). */
+export function facingOf(dx: number, dy: number, diagonals: boolean = FEATURES.diagonals): Facing {
+  if (!diagonals) {
+    if (Math.abs(dx) > Math.abs(dy)) return dx > 0 ? 'E' : 'W';
+    return dy > 0 ? 'S' : 'N';
+  }
+  const sector = Math.round(Math.atan2(dy, dx) / (Math.PI / 4));
+  return SECTORS[((sector % 8) + 8) % 8] ?? 'N';
 }
 
 /** Pose of a vehicle a fraction `t` (0..1) along its cell's route. */

@@ -1,6 +1,5 @@
-import { FEATURES } from '../core/constants';
 import type { GameState } from '../core/game/state';
-import { isValidRotation } from '../core/grid/ports';
+import { canPlaceAt } from '../core/track/rotation';
 import { hashString } from '../core/grid/variant';
 import { cellKey, footprintCells, gridDims, inBounds } from '../core/world/world';
 import type { Catalogs } from '../data/schemas/catalogs';
@@ -133,7 +132,7 @@ export function saveToGame(save: SaveGame, level: Level, catalogs: Catalogs): Re
     const piece = catalogs.pieces[t.piece];
     if (!piece) return add(`world.tracks[${i}].piece`, `unknown piece "${t.piece}"`);
     if (!inBounds(dims, t.at)) add(`world.tracks[${i}].at`, 'track is outside the map');
-    if (!isValidRotation(t.rotation, FEATURES.diagonals)) {
+    if (!canPlaceAt(piece, t.rotation)) {
       add(`world.tracks[${i}].rotation`, `invalid rotation ${t.rotation}`);
     }
     if (t.state >= (piece.stateful ? piece.routes.length : 1)) {

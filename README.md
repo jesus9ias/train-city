@@ -43,17 +43,17 @@ Open a specific level with `?level=<id>` (e.g. http://localhost:5173/?level=sand
 
 ## Controls
 
-| Input                                      | Action                                  |
-| ------------------------------------------ | --------------------------------------- |
-| Palette item, then click the map           | Place a track, object or terrain (drag) |
-| `R`                                        | Rotate the next track piece 90°         |
-| `Del` / `I` / `Esc`                        | Erase tool / Inspect tool / deselect    |
-| `Ctrl+Z` / `Ctrl+Y`                        | Undo / redo                             |
-| Mouse wheel / `+` `−` buttons              | Zoom (0.5×, 1×, 2×, 3×, 4×)             |
-| Middle-button drag, or `Space` + left drag | Pan                                     |
-| `G`                                        | Toggle grid                             |
-| `Tab` (with the map focused) / `P`         | Switch Editor ⇄ Run / play-pause in Run |
-| Click a switch / a train in Run Mode       | Flip the switch / show the train panel  |
+| Input                                      | Action                                               |
+| ------------------------------------------ | ---------------------------------------------------- |
+| Palette item, then click the map           | Place a track, object or terrain (drag)              |
+| `R`                                        | Rotate the next piece (45° or 90°) or turn the train |
+| `Del` / `I` / `Esc`                        | Erase tool / Inspect tool / deselect                 |
+| `Ctrl+Z` / `Ctrl+Y`                        | Undo / redo                                          |
+| Mouse wheel / `+` `−` buttons              | Zoom (0.5×, 1×, 2×, 3×, 4×)                          |
+| Middle-button drag, or `Space` + left drag | Pan                                                  |
+| `G`                                        | Toggle grid                                          |
+| `Tab` (with the map focused) / `P`         | Switch Editor ⇄ Run / play-pause in Run              |
+| Click a switch / a train in Run Mode       | Flip the switch / show the train panel               |
 
 On phones and tablets (narrow screens) the map fills the screen: open the palette with **Build**
 (or **Trains** in Run Mode) and the inspector with **Info**; file actions live under **☰**.

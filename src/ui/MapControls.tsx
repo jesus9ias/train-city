@@ -1,6 +1,8 @@
 import { useStore } from 'zustand';
+import { snapRotation } from '../core/track/rotation';
 import type { Tool } from '../state/editorStore';
 import type { ReadySession } from '../state/gameStore';
+import { rotationStepFor } from '../state/selectors';
 import type { AppStores } from '../state/stores';
 
 type Props = { stores: AppStores; session: ReadySession };
@@ -35,18 +37,21 @@ export function MapControls({ stores, session }: Props) {
   if (session.game.mode !== 'editing' || !tool) return null;
   const { rotate, selectTool } = stores.editor.getState();
   const rotates = tool.kind === 'track' || tool.kind === 'train';
+  const piece = tool.kind === 'track' ? session.ctx.catalogs.pieces[tool.piece] : undefined;
   return (
     <div className="map-controls" role="toolbar" aria-label="Active tool">
       <span className="map-controls__tool" data-testid="active-tool">
         {toolName(tool, session)}
-        {tool.kind === 'track' && ` · ${rotation}°`}
+        {piece && ` · ${snapRotation(piece, rotation)}°`}
       </span>
       {rotates && (
         <button
           type="button"
           className="tool-button"
           aria-label={tool.kind === 'train' ? 'Turn the train around' : 'Rotate piece'}
-          onClick={rotate}
+          onClick={() => {
+            rotate(rotationStepFor(tool, session.ctx.catalogs));
+          }}
         >
           ↻
         </button>

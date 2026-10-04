@@ -2,8 +2,8 @@ import { CELL_SIZE } from '../core/constants';
 import { PixelCanvas } from './canvas';
 import type { PaletteColor } from './palette';
 
-/** Facings with a frame each, in clockwise order from north (spec.md §4.14). */
-export const VEHICLE_FACINGS = ['N', 'E', 'S', 'W'] as const;
+/** Facings with a frame each, in clockwise order from north (spec.md §4.14; 8 from Stage 8). */
+export const VEHICLE_FACINGS = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'] as const;
 
 /** Vehicle bodies span x = 5..14 (10 px) of the 20 px cell, centered on the track. */
 const LEFT = 5;
@@ -189,13 +189,18 @@ const MODELS: Readonly<Record<string, () => PixelCanvas>> = {
 /** Vehicle models that have authored art. */
 export const VEHICLE_IDS = Object.keys(MODELS);
 
-/** Frames `<model>_<facing>`, drawn nose-up and turned losslessly. */
+/**
+ * Frames `<model>_<facing>`, drawn nose-up: cardinal facings are lossless quarter turns, the
+ * diagonal ones quarter turns of a single 45° resample.
+ */
 export function vehicleFrames(): Map<string, PixelCanvas> {
   const frames = new Map<string, PixelCanvas>();
   for (const [id, draw] of Object.entries(MODELS)) {
     const north = draw();
-    VEHICLE_FACINGS.forEach((facing, turns) => {
-      frames.set(`${id}_${facing}`, north.rotated(turns));
+    const northEast = north.rotated45();
+    VEHICLE_FACINGS.forEach((facing, i) => {
+      const base = i % 2 === 0 ? north : northEast;
+      frames.set(`${id}_${facing}`, base.rotated(Math.floor(i / 2)));
     });
   }
   return frames;

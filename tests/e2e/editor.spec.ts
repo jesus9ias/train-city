@@ -48,6 +48,9 @@ test.describe('Editor', () => {
     await expect(page.getByTestId('money')).toHaveText('$2,500');
 
     await page.getByRole('button', { name: /^Straight/ }).click();
+    // A straight turns in 45° steps since Stage 8 (it can be laid diagonally).
+    await page.keyboard.press('r');
+    await expect(page.getByText('Rotation 45°')).toBeVisible();
     await page.keyboard.press('r');
     await expect(page.getByText('Rotation 90°')).toBeVisible();
 

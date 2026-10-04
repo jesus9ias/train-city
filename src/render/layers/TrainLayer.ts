@@ -22,11 +22,16 @@ const SMOKE_LIFE_MS = 900;
 /** Chimney position relative to the locomotive's center, facing north (pixels). */
 const CHIMNEY_AHEAD = 6;
 
+const D = Math.SQRT1_2;
 const AHEAD: Readonly<Record<Facing, { x: number; y: number }>> = {
   N: { x: 0, y: -1 },
+  NE: { x: D, y: -D },
   E: { x: 1, y: 0 },
+  SE: { x: D, y: D },
   S: { x: 0, y: 1 },
+  SW: { x: -D, y: D },
   W: { x: -1, y: 0 },
+  NW: { x: -D, y: -D },
 };
 
 /** Draws trains every frame, interpolating between simulation ticks for smooth motion. */

@@ -123,22 +123,30 @@ function paintPlatform(scene: Phaser.Scene, axis: 'vertical' | 'horizontal') {
   });
 }
 
-/** Maps a pixel drawn facing north to the same pixel for another facing (lossless 90° turns). */
-function orient(x: number, y: number, facing: Facing): [number, number] {
-  const max = CELL_SIZE - 1;
-  switch (facing) {
-    case 'N':
-      return [x, y];
-    case 'E':
-      return [max - y, x];
-    case 'S':
-      return [max - x, max - y];
-    case 'W':
-      return [y, max - x];
-  }
-}
+const FACINGS: readonly Facing[] = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
 
-const FACINGS: readonly Facing[] = ['N', 'E', 'S', 'W'];
+/**
+ * Turns a pixel grid drawn facing north to `facing` by nearest-neighbor sampling about the cell
+ * center (exact for quarter turns).
+ */
+function turned(grid: readonly (Rgb | null)[], facing: Facing): (Rgb | null)[] {
+  const angle = (FACINGS.indexOf(facing) * Math.PI) / 4;
+  const cos = Math.cos(angle);
+  const sin = Math.sin(angle);
+  const c = CELL_SIZE / 2;
+  const out: (Rgb | null)[] = [];
+  for (let y = 0; y < CELL_SIZE; y++) {
+    for (let x = 0; x < CELL_SIZE; x++) {
+      const dx = x + 0.5 - c;
+      const dy = y + 0.5 - c;
+      const sx = Math.floor(c + dx * cos + dy * sin);
+      const sy = Math.floor(c - dx * sin + dy * cos);
+      const inside = sx >= 0 && sy >= 0 && sx < CELL_SIZE && sy < CELL_SIZE;
+      out.push(inside ? (grid[sy * CELL_SIZE + sx] ?? null) : null);
+    }
+  }
+  return out;
+}
 
 /** A vehicle seen from above, nose up (north); 12 px wide, centered in the cell. */
 function paintVehicle(
@@ -149,27 +157,35 @@ function paintVehicle(
   const base = hexToRgb(model.render.color);
   const outline = shade(base, -0.5);
   const light = shade(base, 0.25);
+  const north: (Rgb | null)[] = Array.from({ length: CELL_SIZE * CELL_SIZE }, () => null);
+  const put = (x: number, y: number, color: Rgb) => {
+    north[y * CELL_SIZE + x] = color;
+  };
+  const top = kind === 'locomotive' ? 1 : 2;
+  const bottom = CELL_SIZE - (kind === 'locomotive' ? 2 : 3);
+  for (let y = top; y <= bottom; y++) {
+    for (let x = 4; x <= 15; x++) {
+      const edge = x === 4 || x === 15 || y === top || y === bottom;
+      let color = edge ? outline : base;
+      if (!edge && kind === 'locomotive') {
+        if (y <= top + 2)
+          color = light; // nose
+        else if (y >= bottom - 6 && y <= bottom - 4 && x >= 6 && x <= 13) color = WINDOW; // cab
+      }
+      if (!edge && kind === 'wagon' && (y === top + 5 || y === bottom - 5)) color = outline;
+      put(x, y, color);
+    }
+  }
+  if (kind === 'locomotive') {
+    put(6, top + 1, HEADLIGHT);
+    put(13, top + 1, HEADLIGHT);
+  }
   for (const facing of FACINGS) {
+    const grid = turned(north, facing);
     paint(scene, placeholderKeys.vehicle(model.id, facing), CELL_SIZE, CELL_SIZE, (plot) => {
-      const top = kind === 'locomotive' ? 1 : 2;
-      const bottom = CELL_SIZE - (kind === 'locomotive' ? 2 : 3);
-      for (let y = top; y <= bottom; y++) {
-        for (let x = 4; x <= 15; x++) {
-          const edge = x === 4 || x === 15 || y === top || y === bottom;
-          let color = edge ? outline : base;
-          if (!edge && kind === 'locomotive') {
-            if (y <= top + 2)
-              color = light; // nose
-            else if (y >= bottom - 6 && y <= bottom - 4 && x >= 6 && x <= 13) color = WINDOW; // cab
-          }
-          if (!edge && kind === 'wagon' && (y === top + 5 || y === bottom - 5)) color = outline;
-          plot(...orient(x, y, facing), color);
-        }
-      }
-      if (kind === 'locomotive') {
-        plot(...orient(6, top + 1, facing), HEADLIGHT);
-        plot(...orient(13, top + 1, facing), HEADLIGHT);
-      }
+      grid.forEach((color, i) => {
+        if (color) plot(i % CELL_SIZE, Math.floor(i / CELL_SIZE), color);
+      });
     });
   }
 }

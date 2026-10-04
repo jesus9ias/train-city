@@ -110,13 +110,16 @@ describe('atlases', () => {
     expect(json.frames['f19']?.frame.y).toBeGreaterThan(0);
   });
 
-  it('vehicles have one frame per facing, each a quarter turn of the north one', () => {
+  it('vehicles have 8 facings: quarter turns of the north and north-east frames', () => {
     const frames = vehicleFrames();
     const north = frames.get('loco_steam_N');
     expect(north).toBeDefined();
-    VEHICLE_FACINGS.forEach((facing, turns) => {
-      expect(frames.get(`loco_steam_${facing}`)?.data).toEqual(north?.rotated(turns).data);
+    const northEast = frames.get('loco_steam_NE');
+    VEHICLE_FACINGS.forEach((facing, i) => {
+      const base = i % 2 === 0 ? north : northEast;
+      expect(frames.get(`loco_steam_${facing}`)?.data).toEqual(base?.rotated(i >> 1).data);
     });
+    expect(northEast?.data).toEqual(north?.rotated45().data);
   });
 
   it('the committed atlases are up to date (run `pnpm art` after changing sprites)', () => {

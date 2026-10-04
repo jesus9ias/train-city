@@ -24,9 +24,12 @@ tokens (`src/app/app.css`).
 - **1 cell = 20 × 20 px.** Multi-cell objects use multiples (house 40 × 40, power plant 60 × 60).
 - **Top-down** for terrain, tracks and vehicles; a **3/4 view** for objects (trees, buildings),
   lit from the **top-left**.
-- Vehicles are ~10 px wide, centered on the track, drawn **nose up (north)**; the other facings
-  are lossless quarter turns.
-- Track pieces are drawn at rotation 0 and turned by the renderer in 90° steps.
+- Vehicles are ~10 px wide, centered on the track, drawn **nose up (north)**. There are 8
+  facings: the cardinal ones are lossless quarter turns, the diagonal ones quarter turns of a
+  single 45° nearest-neighbor resample (`PixelCanvas.rotated45`).
+- Track pieces are drawn at rotation 0 (and, for pieces that rotate in 45° steps, also at 45°)
+  and turned by the renderer in 90° steps. Track frames are 30 × 30: the cell plus a 5 px margin,
+  so diagonal rails continue a little past the corner and neighbors join seamlessly.
 - Outlines use `black` (or the darkest tone of the object's ramp), never pure `#000`.
 
 ## Atlases and frame names
@@ -34,13 +37,13 @@ tokens (`src/app/app.css`).
 `pnpm art` writes one atlas per family to `public/assets/atlases/<family>.png` + `.json`
 (Phaser JSON hash) and lists them in `src/data/atlases.json`.
 
-| Family     | Frames                                                 | Used by                               |
-| ---------- | ------------------------------------------------------ | ------------------------------------- |
-| `terrain`  | `<terrain>_<variant>` (3 variants)                     | `terrains.json` → `sprite.frames`     |
-| `objects`  | `<object>_0`                                           | `objects.json` → `sprite.frames`      |
-| `tracks`   | `<piece>_<state>` (one per switch state), `platform_0` | `track-pieces.json` → `sprite.prefix` |
-| `vehicles` | `<model>_<N\|E\|S\|W>`                                 | `train-models.json` → `sprite.prefix` |
-| `ui`       | `explosion_0..5`, `smoke_0..3`, `switch_marker`        | effects in `render/layers`            |
+| Family     | Frames                                                                                     | Used by                               |
+| ---------- | ------------------------------------------------------------------------------------------ | ------------------------------------- |
+| `terrain`  | `<terrain>_<variant>` (3 variants)                                                         | `terrains.json` → `sprite.frames`     |
+| `objects`  | `<object>_0`                                                                               | `objects.json` → `sprite.frames`      |
+| `tracks`   | `<piece>_<state>` (one per switch state), `<piece>_<state>_d` (drawn at 45°), `platform_0` | `track-pieces.json` → `sprite.prefix` |
+| `vehicles` | `<model>_<facing>` for N, NE, E, SE, S, SW, W, NW                                          | `train-models.json` → `sprite.prefix` |
+| `ui`       | `explosion_0..5`, `smoke_0..3`, `switch_marker`                                            | effects in `render/layers`            |
 
 Anything a catalog references but the atlas lacks falls back to a generated placeholder and logs a
 development warning; `src/data/atlases.test.ts` (part of `pnpm validate:data`) fails for the

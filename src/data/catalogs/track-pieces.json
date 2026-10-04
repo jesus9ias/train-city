@@ -22,6 +22,16 @@
       }
     },
     {
+      "id": "curve45",
+      "name": "45° curve",
+      "cost": 12,
+      "routes": [["S", "NE"]],
+      "sprite": {
+        "atlas": "tracks",
+        "prefix": "curve45"
+      }
+    },
+    {
       "id": "cross",
       "name": "X crossing",
       "cost": 30,
@@ -48,6 +58,22 @@
       "sprite": {
         "atlas": "tracks",
         "prefix": "switch"
+      }
+    },
+    {
+      "id": "switch45",
+      "name": "Diagonal switch",
+      "cost": 45,
+      "stateful": true,
+      "trunk": "S",
+      "routes": [
+        ["S", "N"],
+        ["S", "NE"]
+      ],
+      "defaultState": 0,
+      "sprite": {
+        "atlas": "tracks",
+        "prefix": "switch45"
       }
     },
     {

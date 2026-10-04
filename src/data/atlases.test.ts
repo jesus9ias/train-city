@@ -2,10 +2,11 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { inPalette } from '../art/palette';
+import { rotationStep } from '../core/track/rotation';
 import { loadAtlasManifest, loadCatalogs } from './loader';
 import type { SpriteRef } from './schemas/common';
 
-const FACINGS = ['N', 'E', 'S', 'W'];
+const FACINGS = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
 const catalogs = loadCatalogs();
 const manifest = loadAtlasManifest();
 
@@ -30,7 +31,8 @@ function referencedFrames(): { atlas: string; frame: string; owner: string }[] {
   for (const o of Object.values(catalogs.objects)) add(o.id, o.sprite, []);
   for (const p of Object.values(catalogs.pieces)) {
     const states = p.stateful ? p.routes.map((_, i) => String(i)) : ['0'];
-    add(p.id, p.sprite, states);
+    const diagonal = rotationStep(p) === 45 ? states.map((s) => `${s}_d`) : [];
+    add(p.id, p.sprite, [...states, ...diagonal]);
   }
   for (const v of [...Object.values(catalogs.locomotives), ...Object.values(catalogs.wagons)]) {
     add(v.id, v.sprite, FACINGS);

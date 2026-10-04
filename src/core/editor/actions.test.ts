@@ -254,7 +254,7 @@ describe('Feature: Build tracks', () => {
       reasonOf(state, ctx, { type: 'placeTrack', cell, piece, rotation });
     expect(place(at(1, 1), 'curve')).toBe(REASONS.notAllowed);
     expect(place(at(1, 1), 'monorail')).toBe(REASONS.notAllowed);
-    expect(place(at(1, 1), 'straight', 45)).toBe(REASONS.invalidRotation);
+    expect(place(at(1, 1), 'straight', 30)).toBe(REASONS.invalidRotation);
     expect(place(at(-1, 1))).toBe(REASONS.outside);
     expect(place(at(3, 3))).toBe(REASONS.occupied);
   });

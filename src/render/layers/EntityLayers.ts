@@ -47,7 +47,10 @@ class SyncedImages<T> {
 /** A texture plus the rotation to draw it with (atlas frames are authored unrotated). */
 export type PlacedTexture = TextureRef & { readonly angle: number };
 
-/** Atlas frame `<piece>_<state>` turned by the track's rotation, or a pre-rotated placeholder. */
+/**
+ * Atlas frame `<piece>_<state>` (or `<piece>_<state>_d`, drawn at 45°) turned by the rest of the
+ * track's rotation in 90° steps, or a pre-rotated placeholder.
+ */
 export function trackSprite(
   scene: Phaser.Scene,
   piece: TrackPieceDef,
@@ -56,14 +59,15 @@ export function trackSprite(
   state: number,
 ): PlacedTexture {
   const placeholder = { key: placeholderKeys.track(piece.id, rotation, state) };
+  const diagonal = rotation % 90 !== 0;
   const texture = resolvePrefixed(
     piece.sprite,
-    String(state),
+    diagonal ? `${state}_d` : String(state),
     atlases,
     placeholder,
     warnMissingSprite,
   );
-  if (texture !== placeholder) return { ...texture, angle: rotation };
+  if (texture !== placeholder) return { ...texture, angle: diagonal ? rotation - 45 : rotation };
   return { key: trackTexture(scene, piece, rotation, state), angle: 0 };
 }
 

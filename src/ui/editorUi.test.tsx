@@ -164,8 +164,15 @@ describe('shortcuts', () => {
   it('maps keys to editor commands', async () => {
     const stores = await storesWith(makeLevel());
     render(<Harness stores={stores} />);
+    // R turns by the selected piece's step (spec.md §4.4): 45° for a straight, 90° for a curve.
+    await userEvent.keyboard('r');
+    expect(stores.editor.getState().rotation).toBe(45);
+    stores.editor.getState().selectTool({ kind: 'track', piece: 'curve' });
     await userEvent.keyboard('r');
     expect(stores.editor.getState().rotation).toBe(90);
+    stores.editor.getState().selectTool({ kind: 'track', piece: 'straight' });
+    await userEvent.keyboard('r');
+    expect(stores.editor.getState().rotation).toBe(135);
     await userEvent.keyboard('{Delete}');
     expect(stores.editor.getState().tool).toEqual({ kind: 'erase' });
     await userEvent.keyboard('i');
@@ -187,7 +194,7 @@ describe('shortcuts', () => {
 
     // Typing in a form field never triggers shortcuts.
     await userEvent.type(screen.getByLabelText('typing'), 'r');
-    expect(stores.editor.getState().rotation).toBe(90);
+    expect(stores.editor.getState().rotation).toBe(135);
   });
 });
 

@@ -182,7 +182,7 @@ train-city/
 | `NW` | top-left corner | (−1, −1) | `SE` |
 
 - A port of a cell connects **only** to the opposite port of the neighbor given by its offset. A diagonal port (corner) connects only to the diagonal neighbor, never to the two orthogonal cells that share that corner.
-- **MVP (Stages 0–7) uses only the cardinal ports** `N/E/S/W`. Diagonal ports are valid in the types and schemas, but the level/catalog validator rejects them until Stage 8 is enabled (`features.diagonals` flag in `core/constants.ts`).
+- **Stages 0–7 used only the cardinal ports** `N/E/S/W`. From **Stage 8** (`features.diagonals` on in `core/constants.ts`) diagonal ports are enabled: pieces can reach corners, and some pieces rotate in 45° steps (§4.4).
 
 Each cell has **layers**:
 
@@ -279,7 +279,16 @@ Each piece has **routes**: pairs of ports a train can traverse. A **stateful** p
           main line
 ```
 
-Future (Stage 8+): diagonal pieces (diagonal straight, 45° curves, diagonal switches); bridges and tunnels, signals, double slips and slopes are in the backlog.
+**Diagonals (Stage 8).** A route is *drawable* when it is one of: opposite ports (straight: 1 unit cardinal, √2 diagonal); a port and a dead end; a 90° curve between two cardinal ports (quarter circle); or a **45° turn** between a cardinal port and a corner three steps away (e.g. `S → NE`, drawn as a tangent-continuous cubic curve, length ≈ 1.17 units). Sharp 90° curves between two corners are not used (D11). A piece may be placed at a rotation when every rotated route is drawable; platform tracks only in 90° steps. So the straight, the X crossing and the buffer stop rotate in 45° steps (a straight at 45° *is* the diagonal straight), the 90° curve, switch and wye in 90° steps, and two new pieces cover the rest:
+
+```json
+{ "id": "curve45",  "name": "45° curve",       "cost": 12, "routes": [["S","NE"]] },
+{ "id": "switch45", "name": "Diagonal switch", "cost": 45, "stateful": true, "trunk": "S", "routes": [["S","N"],["S","NE"]], "defaultState": 0 }
+```
+
+In the editor, `R` (or ↻) turns the next piece by that piece's step (45° or 90°; 45° with no piece selected or a train); a rotation the piece does not allow snaps back to the previous valid one. Train facings and vehicle sprites use 8 directions.
+
+**Implementation notes (Stage 8)**: `core/track/geometry` adds a `cubic` route shape walked by arc length (64-sample table, memoized per port pair) and `isDrawableRoute`; `core/track/rotation` holds `canPlaceAt`, `rotationStep` and `snapRotation`, used by the editor actions, level validation, save validation and the UI. Catalog validation rejects undrawable routes. Track atlases add `<piece>_<state>_d` frames drawn at 45° (the renderer adds 90° turns), and vehicles get 8 facings (`core/sim/facing` snaps to 8 sectors). Bridges and tunnels, signals, double slips and slopes are in the backlog.
 
 ### 4.5 Stations
 
@@ -1150,7 +1159,7 @@ Feature: Content extensible through JSON
     And a development warning is logged
 ```
 
-### 8.12 Diagonals (future stage)
+### 8.12 Diagonals
 
 ```gherkin
 @s8
@@ -1170,6 +1179,22 @@ Feature: Diagonal tracks
   Scenario: Diagonal crossing through a shared corner
     Given diagonal tracks NE-SW at (10,10) and NW-SE at (11,10)
     Then they do not connect to each other
+
+  Scenario: A 45° curve joins a cardinal line to a diagonal one
+    Given a straight N-S at (5,6), a "curve45" at (5,5) and a diagonal straight at (6,4)
+    When a train runs north through them
+    Then it leaves (5,5) through NE, continues on (6,4), and its sprite faces "NE"
+
+  Scenario: Diagonal switch
+    Given a "switch45" with trunk S in state 1
+    When a train enters from the trunk
+    Then it leaves through NE
+
+  Scenario: Pieces only take the rotations they can draw
+    Given diagonals are enabled
+    Then a "straight" can be placed at 45°
+    And a "curve" (90°) cannot: placement is invalid with reason "Invalid rotation"
+    And pressing R with the "curve" tool turns it 90°, with the "straight" tool 45°
 ```
 
 ---
@@ -1189,7 +1214,7 @@ Each stage ends with a **playable or verifiable demo**, its Definition of Done (
 | **6** ✅ | Multiple trains | Several trains, collisions that destroy trains, buying replacements, bankrupt check, `maxTrains`, train list panel | @s6 |
 | **7** ✅ | Pixel-art pass | Final palette (ADR-002) and atlases for terrain, objects, tracks, vehicles (4 facings) and UI; animations (smoke, crash, switch feedback); pixel font; `docs/art.md` | — |
 | **7b** ✅ | Responsive & touch | Compact layout for phones and tablets (map first, panels as drawers, collapsed file menu); touch controls: tap = click, one-finger pan when no build tool is active, two-finger pan and pinch zoom in discrete steps; on-map buttons for the keyboard-only actions (rotate, deselect) | @s7b |
-| **8** | Diagonals | Enable diagonal ports; diagonal straights, 45° curves and diagonal switches; 8-facing vehicle sprites; 45° rotation in the editor | @s8 |
+| **8** ✅ | Diagonals | Enable diagonal ports; diagonal straights, 45° curves and diagonal switches; 8-facing vehicle sprites; 45° rotation in the editor | @s8 |
 | 9+ | Evolution (backlog) | Per-train orders/schedules · station idle animations · loaded-wagon sprites · signals and blocks · rescue locomotive for stranded trains · depots (change wagons) · distance/time-based revenue · running costs · passengers with random demand (seeded RNG) · terrain autotiling · bridges and tunnels · sound · level editor export · offline PWA · advanced accessibility | — |
 
 **MVP milestone = end of Stage 5.**
@@ -1287,7 +1312,7 @@ Levels after the first are locked until the previous one is completed. Progress 
 9. `elapsedTicks` is monotonically increasing and does not change in Editor Mode.
 10. No switch state is out of range of its routes.
 11. No two trains share a cell at the end of a tick (crashes are resolved within the tick), except on different routes of an X crossing.
-12. Only cardinal ports are used while `features.diagonals` is off.
+12. Only cardinal ports are used while `features.diagonals` is off; with it on, every placed piece's rotation is one it can draw (§4.4).
 
 ### 12.3 Performance
 
@@ -1422,11 +1447,11 @@ Feature: Playing on a phone
 | D8 | Language | English for everything; no i18n for now. |
 | D9 | Can wagons be changed on an existing train? (S6) | No: only scrap and rebuy. Depots stay in the backlog (§9). |
 | D10 | Palette and sprite size? (S7) | ENDESGA 32, native 20 × 20 sprites, generated from code (ADR-002). |
+| D11 | Which diagonal pieces? (S8) | Only 45° turns: diagonal straight (straight at 45°), 45° curve, diagonal switch; no sharp corner-to-corner curves (§4.4). |
 
 ### 15.2 Open
 
 1. **S5**: Is revenue a flat amount per unit, or does it depend on distance or delivery time? (MVP: flat.)
 2. **S5**: Do trains have running/maintenance costs over time? (MVP: no.)
 3. **S5**: Passengers: does every passenger station both supply and demand, with origin/destination pairs?
-4. **S8**: Which diagonal pieces do we need: only 45° curves, or also sharper 90° diagonal-to-diagonal curves?
-5. Should a stranded train (out of fuel or blocked) ever be recoverable (rescue locomotive), or only scrapped?
+4. Should a stranded train (out of fuel or blocked) ever be recoverable (rescue locomotive), or only scrapped?

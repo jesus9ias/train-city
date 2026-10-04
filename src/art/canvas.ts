@@ -109,4 +109,29 @@ export class PixelCanvas {
     }
     return out;
   }
+
+  /**
+   * A copy turned 45° clockwise, same size, by nearest-neighbor sampling about the center.
+   * Not lossless (no 45° turn is), but it keeps every pixel a palette color.
+   */
+  rotated45(): PixelCanvas {
+    const out = new PixelCanvas(this.width, this.height);
+    const cx = this.width / 2;
+    const cy = this.height / 2;
+    const k = Math.SQRT1_2;
+    for (let y = 0; y < out.height; y++) {
+      for (let x = 0; x < out.width; x++) {
+        // Undo a clockwise turn: rotate the destination pixel center counter-clockwise.
+        const dx = x + 0.5 - cx;
+        const dy = y + 0.5 - cy;
+        const sx = Math.floor(cx + (dx + dy) * k);
+        const sy = Math.floor(cy + (dy - dx) * k);
+        if (sx < 0 || sy < 0 || sx >= this.width || sy >= this.height) continue;
+        const from = (sy * this.width + sx) * 4;
+        if (!this.data[from + 3]) continue;
+        out.data.set(this.data.subarray(from, from + 4), (y * out.width + x) * 4);
+      }
+    }
+    return out;
+  }
 }

@@ -4,6 +4,7 @@ import type { ActionOutcome } from '../../core/editor/actions';
 import type { Cell } from '../../core/grid/coords';
 import { poseIn } from '../../core/sim/facing';
 import { facingFromRotation, layoutTrainFacing } from '../../core/sim/placement';
+import { snapRotation } from '../../core/track/rotation';
 import type { WorldState } from '../../core/world/world';
 import type { Catalogs } from '../../data/schemas/catalogs';
 import type { Tool } from '../../state/editorStore';
@@ -87,7 +88,7 @@ export class GhostLayer {
           this.scene,
           piece,
           this.atlases,
-          rotation,
+          snapRotation(piece, rotation),
           piece.defaultState ?? 0,
         );
         placeInCell(this.image, cell, texture).setVisible(true);

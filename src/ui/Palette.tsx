@@ -6,6 +6,8 @@ import type { AppStores } from '../state/stores';
 import { formatMoney } from './format';
 import { ObjectIcon, TerrainIcon, TrackIcon } from './icons';
 import { TrainBuilder } from './TrainBuilder';
+import { snapRotation } from '../core/track/rotation';
+import { rotationStepFor } from '../state/selectors';
 
 type Tab = 'tracks' | 'trains' | 'objects' | 'terrain';
 
@@ -41,7 +43,7 @@ export function Palette({ stores, session }: Props) {
               tool: { kind: 'track', piece: piece.id },
               name: piece.name,
               price: formatMoney(piece.cost),
-              icon: <TrackIcon piece={piece} rotation={rotation} />,
+              icon: <TrackIcon piece={piece} rotation={snapRotation(piece, rotation)} />,
             }))
         : activeTab === 'objects'
           ? Object.values(catalogs.objects).map((object) => ({
@@ -145,7 +147,8 @@ export function Palette({ stores, session }: Props) {
             className="tool-button"
             aria-label="Rotate piece"
             onClick={() => {
-              stores.editor.getState().rotate();
+              const { tool: current, rotate } = stores.editor.getState();
+              rotate(rotationStepFor(current, catalogs));
             }}
           >
             ↻
