@@ -290,7 +290,7 @@ Each piece has **routes**: pairs of ports a train can traverse. A **stateful** p
 { "id": "cross45",       "name": "45° crossing",            "cost": 30, "routes": [["N","S"],["NE","SW"]] }
 ```
 
-Rotation never changes a switch's hand, so each switch comes as a right and a left piece (the original `switch` is shown as "Switch (right)"). **Coverage rule** (D12), checked by a test over the bundled catalog: from every heading a train can go straight or turn 45° either way (and 90° either way from a cardinal heading); a switch can branch to either side, and a wye split both ways, from every heading; and any two lines can cross (cardinal × cardinal, diagonal × diagonal, cardinal × diagonal).
+Pieces may carry a one-line `description`, shown in the palette (as a tooltip, and under the list for the selected piece). The palette's Tracks tab groups pieces as **Lines & curves**, **Switches & wyes** (stateful pieces) and **Crossings** (several routes, no state), derived from the piece data. Rotation never changes a switch's hand, so each switch comes as a right and a left piece (the original `switch` is shown as "Switch (right)"). **Coverage rule** (D12), checked by a test over the bundled catalog: from every heading a train can go straight or turn 45° either way (and 90° either way from a cardinal heading); a switch can branch to either side, and a wye split both ways, from every heading; and any two lines can cross (cardinal × cardinal, diagonal × diagonal, cardinal × diagonal).
 
 In the editor, `R` (or ↻) turns the next piece by that piece's step (45° or 90°; 45° with no piece selected or a train); a rotation the piece does not allow snaps back to the previous valid one. Train facings and vehicle sprites use 8 directions.
 

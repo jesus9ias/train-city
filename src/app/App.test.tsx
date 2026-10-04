@@ -86,6 +86,9 @@ describe('App — compact layout (spec.md §13.1)', () => {
 
     // On-map controls replace the keyboard shortcuts.
     expect(screen.getByTestId('active-tool')).toHaveTextContent('Curve · 0°');
+    expect(screen.getByRole('toolbar', { name: 'Active tool' })).toHaveTextContent(
+      '90° turn between two straight lines.',
+    );
     await userEvent.click(screen.getByRole('button', { name: 'Rotate piece' }));
     expect(stores.editor.getState().rotation).toBe(90);
     await userEvent.click(screen.getByRole('button', { name: 'Deselect tool' }));

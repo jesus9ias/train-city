@@ -40,9 +40,12 @@ export function MapControls({ stores, session }: Props) {
   const piece = tool.kind === 'track' ? session.ctx.catalogs.pieces[tool.piece] : undefined;
   return (
     <div className="map-controls" role="toolbar" aria-label="Active tool">
-      <span className="map-controls__tool" data-testid="active-tool">
-        {toolName(tool, session)}
-        {piece && ` · ${snapRotation(piece, rotation)}°`}
+      <span className="map-controls__label">
+        <span className="map-controls__tool" data-testid="active-tool">
+          {toolName(tool, session)}
+          {piece && ` · ${snapRotation(piece, rotation)}°`}
+        </span>
+        {piece?.description && <span className="map-controls__hint">{piece.description}</span>}
       </span>
       {rotates && (
         <button

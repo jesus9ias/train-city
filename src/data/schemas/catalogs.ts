@@ -34,6 +34,8 @@ export const routeSchema = z.tuple([portSchema, portSchema.nullable()]);
 export const trackPieceSchema = z.strictObject({
   id: idSchema,
   name: nameSchema,
+  /** One-line help shown in the palette. */
+  description: z.string().min(1).optional(),
   cost: nonNegative,
   routes: z.array(routeSchema).min(1),
   stateful: z.boolean().optional(),

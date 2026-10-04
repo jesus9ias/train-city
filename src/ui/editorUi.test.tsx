@@ -70,6 +70,37 @@ describe('Palette', () => {
     expect(stores.editor.getState().tool).toBeNull();
   });
 
+  it('groups track pieces and explains the selected one', async () => {
+    const stores = await storesWith(makeLevel());
+    const view = () => <Palette stores={stores} session={ready(stores)} />;
+    const { rerender } = render(view());
+    const groups = screen.getAllByRole('heading', { level: 3 }).map((h) => h.textContent);
+    expect(groups).toEqual(['Lines & curves', 'Switches & wyes', 'Crossings']);
+    const names = (group: string) =>
+      within(screen.getByRole('region', { name: group }))
+        .getAllByRole('button')
+        .map((b) => b.querySelector('.palette__name')?.textContent);
+    expect(names('Switches & wyes')).toEqual([
+      'Switch (right)',
+      'Switch (left)',
+      'Diagonal switch (right)',
+      'Diagonal switch (left)',
+      'Wye',
+      '45° wye',
+    ]);
+    expect(names('Crossings')).toEqual(['X crossing', '45° crossing']);
+    expect(names('Lines & curves')).toContain('45° curve');
+
+    expect(screen.queryByTestId('piece-description')).not.toBeInTheDocument();
+    const curve45 = screen.getByRole('button', { name: /45° curve/ });
+    expect(curve45).toHaveAttribute('title', expect.stringContaining('turn left or right'));
+    await userEvent.click(curve45);
+    rerender(view());
+    expect(screen.getByTestId('piece-description')).toHaveTextContent(
+      '45° curve: 45° turn between a straight and a diagonal line. Rotate it to turn left or right.',
+    );
+  });
+
   it('switches tabs and selects tools', async () => {
     const stores = await storesWith(makeLevel());
     render(<Palette stores={stores} session={ready(stores)} />);
