@@ -83,6 +83,12 @@ export class CameraController {
     return pixelToCell(world.x, world.y, this.map.widthPx, this.map.heightPx);
   }
 
+  /** The pointer's map position in cell units (fractional), for tools that steer by it. */
+  pointAt(pointer: Phaser.Input.Pointer): { x: number; y: number } {
+    const world = this.camera.getWorldPoint(pointer.x, pointer.y);
+    return { x: world.x / CELL_SIZE, y: world.y / CELL_SIZE };
+  }
+
   /** Canvas pixel at the center of a cell (inverse of `cellAt`). */
   cellToCanvas(cell: { x: number; y: number }): { x: number; y: number } {
     const { camera } = this;

@@ -92,7 +92,8 @@ export class WorldScene extends Phaser.Scene {
       const { rotation, inspected, showNetwork } = editor.getState();
       // Tools only act in Editor Mode, so the ghost is hidden while running.
       const tool = session.game.mode === 'editing' ? editor.getState().tool : null;
-      const { hoverCell } = view.getState();
+      // While a line is being drawn, the cells under the pointer are the line itself.
+      const hoverCell = controller.drawing ? null : view.getState().hoverCell;
       const w = session.game.world;
       ghost.render({
         cell: hoverCell,
@@ -129,7 +130,7 @@ export class WorldScene extends Phaser.Scene {
     const onMove = (pointer: Phaser.Input.Pointer) => {
       if (!toolPointerDown || camera.isPanGesture(pointer)) return;
       const cell = camera.cellAt(pointer);
-      if (cell) controller.drag(cell);
+      if (cell) controller.drag(cell, camera.pointAt(pointer));
     };
     const onUp = (pointer?: Phaser.Input.Pointer) => {
       const tap = pendingTap;
