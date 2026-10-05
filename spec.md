@@ -589,6 +589,12 @@ When a check fails, the level becomes `failed`, the simulation stops, and the re
 
 - **Palette** (React) with tabs: Tracks · Objects · Terrain (Stage 2), plus Trains (Stage 4) and Stations (backlog: player-built stations). Only shows what `editorRules` allows, with the price of each item. Tools: Erase, Rotate (click a placed track to turn it 90°), Inspect, Undo, Redo.
 - **Tools**: Place, Erase/Scrap, Rotate (`R` key), Terrain brush (drag), Inspect.
+- **Drawing track by dragging** (after Stage 9): with the **Straight** tool, pressing and dragging draws a line that follows the pointer cell by cell in 8 directions (`core/editor/drawLine.ts`). The line's head steps to a neighbor once the pointer is a cell away from the head's center. It **keeps its heading** while the pointer moves ahead within 0.9 cells of the line (hand jitter never bends it); otherwise it turns towards the pointer, snapped to 8 headings with a bias for cardinal ones (within 30° of N/E/S/W counts as cardinal). The first heading is chosen once the pointer is 2 cells from the click, and on release the line finishes in the cell under the pointer. So a diagonal drag lays a diagonal line instead of a staircase, and a shaky horizontal drag stays horizontal. Pieces orient themselves: straight cells along the heading, and where the line turns, the cell becomes the piece the level allows for that turn (a 90° curve between cardinal headings, a 45° curve for 45° turns). Turns the catalog cannot draw (90° between diagonals, 135°, U-turns) or that the level does not allow are refused: the line waits until the pointer comes back to an allowed heading. Rules:
+  - Only cells placed **by this stroke** are re-oriented; existing track is never changed, so a line can start from (or pass over) existing track and joins it.
+  - Each new cell is placed as a straight along the heading as soon as the line enters it, and turned into a curve when the line leaves it in another direction (an erase and a place in the same stroke: free, since it was placed in this editor session).
+  - A plain click still places the selected piece at the selected rotation, as before. Its failure (e.g. "occupied") is only reported if the pointer is released without drawing.
+  - The whole stroke is one undo step; cells that cannot take track (water, objects, no money) are skipped, the line goes on.
+  - Other pieces (curves, switches, signals…) keep the click-only behavior. Touch: the same with one finger while the Straight tool is selected.
 - **Ghost preview**, green if placement is valid and red if not, with a tooltip explaining why and showing the cost.
 - **Placement validations**: inside the map, `buildable` terrain, no blocking object, cell not `locked`, **cell not occupied by a train**, enough money, item allowed, `maxTrains` not exceeded.
 - **Trains**:
@@ -596,7 +602,7 @@ When a check fails, the level becomes `failed`, the simulation stops, and the re
   - The **Erase** tool removes the topmost thing in a cell: a train first (scrapping it), then a track, then an object.
   - The train occupies cells behind the locomotive along the track. If it doesn't fit, placement is invalid.
   - Scrapping a train refunds `purchaseValue × refundRatio`.
-- **Undo/Redo** (`Ctrl+Z` / `Ctrl+Y` or `Ctrl+Shift+Z`, up to 100 steps). Every edit is a pure `applyAction(state, ctx, action)` transition (`core/editor/actions.ts`); the history keeps the immutable states before/after each one (structural sharing keeps this cheap). A drag stroke (terrain brush, erase) is a single undo step. The history covers the current editor session and is **cleared when the simulation resumes**.
+- **Undo/Redo** (`Ctrl+Z` / `Ctrl+Y` or `Ctrl+Shift+Z`, up to 100 steps). Every edit is a pure `applyAction(state, ctx, action)` transition (`core/editor/actions.ts`); the history keeps the immutable states before/after each one (structural sharing keeps this cheap). A drag stroke (terrain brush, erase, drawn track) is a single undo step. The history covers the current editor session and is **cleared when the simulation resumes**.
 - **Preview = the real action**: the ghost and the cursor tooltip run the same `applyAction` and discard the result, so a preview can never disagree with what a click does.
 - **Camera**: pan (middle-button drag or `Space` + drag), wheel zoom in discrete steps (0.5×, 1×, 2×, 3×, 4×), toggleable grid (`G`).
 - **Network validator** ("Check network" button): highlights loose ends (ports with no matching neighbor), buffer stops (dead ends: trains cannot reverse), track not reaching any station, and isolated stations (whose track group reaches no other station), plus the number of track groups. Informational only, never blocking.
@@ -835,6 +841,43 @@ Feature: Piece connectivity (core rules)
     Given the diagonals feature is disabled
     When a catalog defines a piece with route ["NE","SW"]
     Then validation fails with "Diagonal ports are not enabled"
+```
+
+### 8.3.1 Drawing track by dragging
+
+```gherkin
+Feature: Draw track by dragging
+
+  Background:
+    Given an empty grass map and the "straight" tool at rotation 0
+
+  Scenario: Dragging along a row lays a horizontal line
+    When I press on (5,5) and drag to (9,5)
+    Then cells (5,5) to (9,5) hold straights at rotation 90
+    And one undo removes the whole line
+
+  Scenario: A diagonal drag lays a diagonal line, not a staircase
+    When I press on (5,5) and drag through the corners to (8,8)
+    Then cells (5,5), (6,6), (7,7) and (8,8) hold straights at rotation 135
+
+  Scenario: Turns become curves
+    When I press on (5,5), drag east to (8,5) and then south to (8,8)
+    Then (8,5) holds a "curve" connecting W and S
+    When I press on (5,10), drag east to (8,10) and then south-east to (10,12)
+    Then (8,10) holds a "curve45" connecting W and SE
+
+  Scenario: Turns that cannot be drawn are refused
+    When I drag east and then straight back west
+    Then the line stops where it turned
+
+  Scenario: Existing track is never changed
+    Given a curve at (7,5)
+    When I press on (5,5) and drag to (9,5)
+    Then (7,5) still holds the curve, and (5,5), (6,5), (8,5), (9,5) hold straights
+
+  Scenario: A click without dragging still places one piece
+    When I click (5,5)
+    Then (5,5) holds a straight at rotation 0
 ```
 
 ### 8.4 Switches, wyes, crossings and loops

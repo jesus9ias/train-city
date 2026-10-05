@@ -4,7 +4,7 @@
     {
       "id": "straight",
       "name": "Straight",
-      "description": "Straight line. It turns in 45° steps, so it also lays diagonal lines.",
+      "description": "Straight line, also diagonal (it turns in 45° steps). Drag to draw a line: turns become curves.",
       "cost": 10,
       "routes": [["N", "S"]],
       "sprite": {

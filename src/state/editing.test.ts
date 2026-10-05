@@ -131,9 +131,9 @@ describe('editor controller', () => {
     expect(stores.editor.getState().notice).toBeNull();
   });
 
-  it('only drag tools act while dragging', async () => {
+  it('only drag tools act while dragging (the Straight draws lines: drawLine.test.ts)', async () => {
     const stores = await storesWith(makeLevel());
-    stores.editor.getState().selectTool({ kind: 'track', piece: 'straight' });
+    stores.editor.getState().selectTool({ kind: 'track', piece: 'curve' });
     const controller = createEditorController(stores);
     controller.down(at(1, 1));
     controller.drag(at(2, 1));
