@@ -158,6 +158,12 @@ export function validateCatalogs(raw: RawCatalogs): Result<Catalogs> {
         pieceIssues.add(['pieces', i, 'defaultState'], 'defaultState is out of range');
       }
     }
+    if (piece.signal !== undefined && !piece.routes.some((r) => r.includes(piece.signal ?? null))) {
+      pieceIssues.add(
+        ['pieces', i, 'signal'],
+        `the signal port "${piece.signal}" is not on a route`,
+      );
+    }
   });
 
   trains.value.wagons.forEach((wagon, i) => {

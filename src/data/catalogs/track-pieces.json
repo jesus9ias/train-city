@@ -63,6 +63,18 @@
       }
     },
     {
+      "id": "signal",
+      "name": "Signal",
+      "description": "Stops trains heading its way while the track ahead, up to the next signal, holds another train. Trains from behind pass.",
+      "cost": 50,
+      "routes": [["S", "N"]],
+      "signal": "N",
+      "sprite": {
+        "atlas": "tracks",
+        "prefix": "signal"
+      }
+    },
+    {
       "id": "switch",
       "name": "Switch (right)",
       "description": "From the trunk, trains go straight or branch right. Click it in Run Mode to flip it.",

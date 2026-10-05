@@ -42,6 +42,8 @@ export const trackPieceSchema = z.strictObject({
   trunk: portSchema.optional(),
   defaultState: z.int().min(0).optional(),
   isStation: z.boolean().optional(),
+  /** Signal pieces: the exit (base orientation) whose trains must obey the signal (§4.10.1). */
+  signal: portSchema.optional(),
   sprite: spriteRefSchema.optional(),
 });
 

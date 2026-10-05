@@ -10,6 +10,7 @@ const STATUS_TEXT: Record<TrainState['status'], string> = {
   running: 'Running',
   loading: 'Loading',
   blocked: 'Blocked: the track ends',
+  waiting: 'Waiting for signal',
   derailed: 'Derailed',
   out_of_fuel: 'Out of fuel',
 };

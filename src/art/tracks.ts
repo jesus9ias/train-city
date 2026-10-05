@@ -1,6 +1,6 @@
 import { CELL_SIZE } from '../core/constants';
 import { isDiagonal } from '../core/grid/ports';
-import { routePoint, routeShape, type RouteShape } from '../core/track/geometry';
+import { routePoint, routeShape, signalPost, type RouteShape } from '../core/track/geometry';
 import { activeRouteIndex, pieceRoutes } from '../core/track/routes';
 import { rotationStep } from '../core/track/rotation';
 import type { TrackPieceDef } from '../data/schemas/catalogs';
@@ -87,6 +87,21 @@ export function drawTrack(piece: TrackPieceDef, state: number, rotation: 0 | 45 
         c.set(p.x + n.x * s + tangent.x, p.y + n.y * s + tangent.y, 'wine');
       }
     }
+  }
+  if (piece.signal !== undefined) {
+    // Signal post beside the line; the lit lamp is drawn on top at run time (ui atlas).
+    const { lamp, foot } = signalPost(rotation);
+    const at = (u: number) => TRACK_PADDING + u * CELL_SIZE;
+    for (let k = 0; k <= 8; k++) {
+      const x = at(foot.x + ((lamp.x - foot.x) * k) / 8);
+      const y = at(foot.y + ((lamp.y - foot.y) * k) / 8);
+      c.set(x, y + 1, 'black');
+      c.set(x, y, 'ink');
+    }
+    const x = Math.floor(at(lamp.x)) - 1;
+    const y = Math.floor(at(lamp.y)) - 1;
+    c.rect(x - 1, y - 1, 5, 5, 'black');
+    c.rect(x, y, 3, 3, 'night');
   }
   if (piece.stateful) {
     // Lever lamp in a corner of the cell: green on the default route, amber otherwise.

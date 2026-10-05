@@ -16,7 +16,14 @@ export type Wagon = {
 };
 
 export type TrainStatus =
-  'stopped' | 'running' | 'loading' | 'blocked' | 'derailed' | 'out_of_fuel';
+  | 'stopped'
+  | 'running'
+  | 'loading'
+  | 'blocked'
+  /** Stopped at a red signal (spec.md §4.10.1). */
+  | 'waiting'
+  | 'derailed'
+  | 'out_of_fuel';
 
 /** A one-directional train: the locomotive always leads (spec.md §4.7–4.8). */
 export type TrainState = {

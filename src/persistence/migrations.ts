@@ -59,6 +59,8 @@ export const MIGRATIONS: Readonly<Record<number, Migration>> = {
       },
     };
   },
+  /** v3 → v4 (Stage 9): trains may be `waiting` at a signal; every v3 save is a valid v4 save. */
+  3: (save) => ({ ...save, schemaVersion: 4 }),
 };
 
 export function migrate(

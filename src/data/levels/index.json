@@ -22,6 +22,11 @@
       "unlocked": false
     },
     {
+      "id": "level-005",
+      "name": "Signal Box",
+      "unlocked": false
+    },
+    {
       "id": "sandbox",
       "name": "Sandbox",
       "unlocked": true

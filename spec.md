@@ -294,7 +294,15 @@ Pieces may carry a one-line `description`, shown in the palette (as a tooltip, a
 
 In the editor, `R` (or ↻) turns the next piece by that piece's step (45° or 90°; 45° with no piece selected or a train); a rotation the piece does not allow snaps back to the previous valid one. Train facings and vehicle sprites use 8 directions.
 
-**Implementation notes (Stage 8)**: `core/track/geometry` adds a `cubic` route shape walked by arc length (64-sample table, memoized per port pair) and `isDrawableRoute`; `core/track/rotation` holds `canPlaceAt`, `rotationStep` and `snapRotation`, used by the editor actions, level validation, save validation and the UI. Catalog validation rejects undrawable routes. Track atlases add `<piece>_<state>_d` frames drawn at 45° (the renderer adds 90° turns), and vehicles get 8 facings (`core/sim/facing` snaps to 8 sectors). Bridges and tunnels, signals, double slips and slopes are in the backlog.
+**Implementation notes (Stage 8)**: `core/track/geometry` adds a `cubic` route shape walked by arc length (64-sample table, memoized per port pair) and `isDrawableRoute`; `core/track/rotation` holds `canPlaceAt`, `rotationStep` and `snapRotation`, used by the editor actions, level validation, save validation and the UI. Catalog validation rejects undrawable routes. Track atlases add `<piece>_<state>_d` frames drawn at 45° (the renderer adds 90° turns), and vehicles get 8 facings (`core/sim/facing` snaps to 8 sectors). Bridges and tunnels, double slips and slopes are in the backlog.
+
+**Signals (Stage 9).** A signal is a track piece: a straight with a signal post that guards **one direction**, given in base orientation by its `signal` port (the exit it protects). It rotates in 45° steps like the straight, so it also works on diagonal lines. Trains leaving through the protected port obey it; trains running the other way pass it freely. Blocks and aspects are explained in §4.10.1.
+
+```json
+{ "id": "signal", "name": "Signal", "cost": 50, "routes": [["S","N"]], "signal": "N" }
+```
+
+Catalog validation requires `signal` to be an end of one of the piece's routes. The palette lists signals in their own **Signals** group.
 
 ### 4.5 Stations
 
@@ -374,7 +382,7 @@ type TrainState = {
   targetSpeed: number;  // 0 or maxSpeed (MVP)
   fuel: number;
   autoRefuel: boolean;  // default true
-  status: 'stopped' | 'running' | 'loading' | 'blocked' | 'derailed' | 'out_of_fuel';
+  status: 'stopped' | 'running' | 'loading' | 'blocked' | 'waiting' | 'derailed' | 'out_of_fuel';
   dwellRemaining: number;
   purchaseValue: number; // total paid for loco + wagons (used for scrap refunds)
 };
@@ -387,7 +395,7 @@ The heading is implied by `entryPort` and the active route; there is no "reverse
 1. If `status` is `loading`: decrement `dwellRemaining` and process unload → load → refuel; when it reaches 0 → `running`.
 2. Accelerate or brake towards `targetSpeed` using `acceleration`.
 3. `advance = speed × terrain.speedMultiplier × dt`; `progress += advance`.
-4. While `progress ≥ routeLength`: exit through the current route's exit port, enter the neighboring cell (applying the rules in 4.4), push the cell onto `trail` (trimmed to `wagons.length` entries), and `progress -= routeLength`. Consume fuel for the distance travelled (4.9).
+4. While `progress ≥ routeLength`: if the head is on a signal and is about to leave through its protected port while the block ahead is occupied, stop there with status `waiting` (§4.10.1). Otherwise exit through the current route's exit port, enter the neighboring cell (applying the rules in 4.4), push the cell onto `trail` (trimmed to `wagons.length` entries), and `progress -= routeLength`. Consume fuel for the distance travelled (4.9).
 5. Check collisions (4.10), station stops and failure conditions (4.13).
 6. Idle consumption: `fuelIdlePerSecond × dt` while the train is `stopped`/`loading`.
 
@@ -418,9 +426,21 @@ Purchase (fuel is **bought with money** at the level's `economy.fuelPrice` per f
 - If two trains occupy the same cell (except on an X crossing through different routes) → **both trains are destroyed**: they are removed from the state at the end of the tick and their cargo is counted as `lost`. A `train_crashed` event is emitted (explosion animation).
 - Track and stations are left intact (MVP).
 - A crash **does not fail the level by itself**. The cost is the lost investment: the player must buy new trains. The level fails only if a failure check (4.13) says the objectives are no longer reachable.
-- Future: signals and blocks that prevent collisions automatically.
+- Signals and blocks (Stage 9, §4.10.1) let the player prevent collisions.
 
 **Implementation notes (Stage 6)**: `core/sim/collisions.ts` runs at the end of every tick, after all trains have moved, comparing each train's cells before and after the tick (in train order, so it is deterministic). Two trains collide when (a) they end the tick on the same cell and their routes through it share a port — so only different routes of an X crossing are exempt — or (b) they swapped cells head-on (each entered a cell the other held when the tick began). Following a train bumper to bumper is not a collision. The cargo of destroyed trains goes to `run.lost`; the `train_crashed` event carries the trains' ids and locomotives, the cell and the lost cargo, and the UI shows a toast and a placeholder burst (final animation in Stage 7). Running into a stopped or blocked train also destroys both. Lost trains are replaced by buying new ones in Editor Mode, within `editorRules.maxTrains`; the Trains tab lists every train (`n/maxTrains`) with a Scrap button, and the Run Mode panel lists them with Start/Stop.
+
+### 4.10.1 Signals and blocks (Stage 9)
+
+- **Block**: the track cells behind a signal's protected port, up to the next signals and the ends of the track. It is found by walking every connection of every piece (all routes of switches and crossings, whatever their state), so a switch or a crossing joins its lines into one block. A signal cell ends the walk. A signal reached from behind (the walk runs the way it guards) is the end of the block and part of it; a signal reached through its guarded exit is the way into the block from elsewhere, so it is left out: a train standing on it is waiting to enter, not inside. That is why the starting signal's own cell is not in its block ahead, and why two trains waiting at the two signals of a merge do not block each other.
+- **Aspect**: a signal is **red** when any train other than the one asking has a vehicle (locomotive or wagon) in the block ahead, and **green** otherwise. Aspects are derived from the state every time they are needed and never stored, so saves do not change for them and the core stays pure.
+- **Stopping**: a train reaching the end of a signal cell through its protected port with a red aspect stops at the cell edge with status `waiting` and speed 0. Each tick it checks again and starts moving (accelerating from 0) as soon as the aspect is green. While waiting it idles (fuel per §4.9). No braking distances: trains stop short, as at a dead end.
+- **Order within a tick**: trains move in train order and occupancy is updated after each one, so when two trains reach the same free block in the same tick, the first one enters and the other one waits. Runs stay deterministic.
+- A train never blocks itself: a long train on a short circuit ignores its own wagons.
+- Signals do not prevent every crash: a train entering a block through a junction or a track with no signal is not stopped. Path signals (reserving a route through junctions) are in the backlog (D13).
+- **Render**: the signal post carries a lamp, drawn red or green from the derived aspect (`signal_red` / `signal_green` frames of the `ui` atlas). The train panel shows "Waiting for signal".
+
+**Implementation notes (Stage 9)**: `core/sim/signals.ts` holds `protectedExit`, `blockAhead` (memoized per track list) and `signalAspects`. `step` keeps the positions of the trains already moved in the tick and passes them to the signal check.
 
 ### 4.11 Time
 
@@ -506,7 +526,7 @@ When a check fails, the level becomes `failed`, the simulation stops, and the re
   "editorRules": {
     "allowTerrainEdit": false,
     "allowObjectEdit": true,
-    "allowedPieces": ["straight", "curve", "switch", "wye", "buffer", "station_track"],
+    "allowedPieces": ["straight", "curve", "curve45", "switch", "switch_left", "wye", "buffer", "station_track"],
     "allowedLocomotives": ["loco_steam"],
     "allowedWagons": ["wagon_hopper"],
     "maxTrains": 1
@@ -535,7 +555,7 @@ When a check fails, the level becomes `failed`, the simulation stops, and the re
 ```
 
 - `levels/index.json` lists level order, display names and which levels are initially unlocked.
-- `editorRules.allowedPieces`, `allowedLocomotives` and `allowedWagons` are optional: omitted means "everything in the catalog".
+- `editorRules.allowedPieces`, `allowedLocomotives` and `allowedWagons` are optional: omitted means "everything in the catalog". A level that allows any piece rotating in 45° steps (e.g. the straight, which then lays diagonal lines) must also allow `curve45`, so diagonal lines can be joined to straight ones (checked by a data test).
 - Ids use letters, digits, `_` and `-` (e.g. `st_A`, `level-001`). Station track cells must hold `isStation` pieces running along the station line.
 - `sandbox.json` is a level with no objectives, fully permissive `editorRules` and infinite money (`initialMoney: null`). In the sandbox, failure checks are disabled.
 - MVP objective types: `deliver` (cargo/passengers). Progress counts every delivery of that cargo at `to`; `from` is informational for now, because cargo does not remember its origin. Future: `deliverWithin`, `maxFuel`, `connect`, `noCrash`, `chain`, `minProfit`.
@@ -586,7 +606,7 @@ When a check fails, the level becomes `failed`, the simulation stops, and the re
 - **Controls**: Play/Pause, speed ×1/×2/×4, Restart level (with confirmation).
 - **Canvas interactions**:
   - Clicking a switch flips it (if free).
-  - Clicking a train opens a panel with start/stop, auto-refuel on/off, fuel level, cargo and status.
+  - Clicking a train opens a panel with start/stop, auto-refuel on/off, fuel level, cargo and status (including "Waiting for signal", Stage 9).
 - **HUD**: money (with ledger tooltip), elapsed time / limit, total fuel used, build cost, progress of each objective and projected stars.
 - **Not allowed** in this mode: placing, erasing or rotating pieces, changing terrain or buying trains (switch to Editor Mode, which pauses the game).
 
@@ -614,7 +634,7 @@ When a check fails, the level becomes `failed`, the simulation stops, and the re
 
 ### 7.2 `SaveGame` format (also the download format)
 
-Schema: `src/data/schemas/save.ts`. Version 1 (Stages 2–3) stored everything the editor can change. **Version 2 (Stage 4)** added `world.trains` (each with its cells, progress, speed, status, fuel and prices), `run: { elapsedTicks, paused }`, `editor.nextTrainId` and `mode: "editing" | "running"`. **Version 3 (Stage 5, current)** adds `run.inventories`, `run.delivered`, `run.lost`, `run.fuelUsedTotal`, `run.fuelUsedByTrain`, `run.fuelBoughtTotal`, `run.outcome`, and per-train `dwellRemaining` and `lastStation`; the v2 → v3 migration starts inventories from each station's `initial` supply and everything else at zero. Example of the v1 part:
+Schema: `src/data/schemas/save.ts`. Version 1 (Stages 2–3) stored everything the editor can change. **Version 2 (Stage 4)** added `world.trains` (each with its cells, progress, speed, status, fuel and prices), `run: { elapsedTicks, paused }`, `editor.nextTrainId` and `mode: "editing" | "running"`. **Version 3 (Stage 5)** adds `run.inventories`, `run.delivered`, `run.lost`, `run.fuelUsedTotal`, `run.fuelUsedByTrain`, `run.fuelBoughtTotal`, `run.outcome`, and per-train `dwellRemaining` and `lastStation`; the v2 → v3 migration starts inventories from each station's `initial` supply and everything else at zero. **Version 4 (Stage 9, current)** allows the train status `waiting`; the v3 → v4 migration only bumps the version (every v3 save is a valid v4 save). Example of the v1 part:
 
 ```json
 {
@@ -1218,6 +1238,57 @@ Feature: Diagonal tracks
     And no train crashes where the two lines cross
 ```
 
+### 8.13 Signals and blocks
+
+```gherkin
+@s9
+Feature: Signals and blocks
+
+  Background:
+    Given a one-way line running east with a "signal" at (5,0) protecting E
+    And the block ahead of it is the line from (6,0) to the next signal at (12,0)
+
+  Scenario: A signal is green when its block is free
+    Given no train on cells (6,0) to (12,0)
+    Then the signal at (5,0) is green
+
+  Scenario: A train waits at a red signal and goes on when the block clears
+    Given train "t2" is in the block ahead
+    When train "t1" reaches the east edge of (5,0)
+    Then "t1" stops there with status "waiting" and speed 0
+    When "t2" leaves the block
+    Then "t1" starts moving again on the next tick
+
+  Scenario: Trains running against a signal pass it
+    Given the block west of (5,0) is occupied
+    When a train runs west through (5,0)
+    Then it does not stop
+
+  Scenario: Two trains reaching the same free block in the same tick
+    Given trains "t1" and "t2" both reach signals into the same free block in the same tick
+    Then "t1" enters the block and "t2" waits
+
+  Scenario: Junctions and crossings join their lines into one block
+    Given a block containing an X crossing
+    When a train is on the other line of the crossing
+    Then the signal into the block is red
+
+  Scenario: A train never waits for itself
+    Given a circuit with a single signal and a train longer than the circuit's free cells
+    Then the train passes its own signal
+
+  Scenario: Signals keep two trains on one circuit apart
+    Given level "level-005" with its reference solution
+    When both trains run
+    Then the level is completed with at least 2 stars and no train is lost
+    But with the signals replaced by straights, the trains crash
+
+  Scenario: Old saves still load
+    Given a save in format version 3
+    When it is loaded
+    Then it is migrated to version 4 unchanged except for the version
+```
+
 ---
 
 ## 9. Stages (roadmap)
@@ -1236,11 +1307,13 @@ Each stage ends with a **playable or verifiable demo**, its Definition of Done (
 | **7** ✅ | Pixel-art pass | Final palette (ADR-002) and atlases for terrain, objects, tracks, vehicles (4 facings) and UI; animations (smoke, crash, switch feedback); pixel font; `docs/art.md` | — |
 | **7b** ✅ | Responsive & touch | Compact layout for phones and tablets (map first, panels as drawers, collapsed file menu); touch controls: tap = click, one-finger pan when no build tool is active, two-finger pan and pinch zoom in discrete steps; on-map buttons for the keyboard-only actions (rotate, deselect) | @s7b |
 | **8** ✅ | Diagonals | Enable diagonal ports; diagonal straights, 45° curves and diagonal switches; 8-facing vehicle sprites; 45° rotation in the editor | @s8 |
-| 9+ | Evolution (backlog) | Per-train orders/schedules · station idle animations · loaded-wagon sprites · signals and blocks · rescue locomotive for stranded trains · depots (change wagons) · distance/time-based revenue · running costs · passengers with random demand (seeded RNG) · terrain autotiling · bridges and tunnels · sound · level editor export · offline PWA · advanced accessibility | — |
+| **9** | Signals and blocks | `signal` piece (one direction, 45° rotation), blocks and derived red/green aspects (§4.10.1), `waiting` train status (save v4), signal art, a Signals palette group, tutorial `level-005`; left-hand switches allowed in `level-001` and `level-003`, and the 45° curve in `level-001`–`level-003` | @s9 |
+| 10 | Economy 2 and rescue | Revenue by distance with a speed bonus (D14), running costs per locomotive per minute (D15), rescue locomotive for stranded trains (D17); scenarios written when the stage starts | @s10 |
+| 11+ | Evolution (backlog) | Path signals · per-train orders/schedules · passengers with origin and destination and random demand (seeded RNG, D16) · station idle animations · loaded-wagon sprites · depots (change wagons) · terrain autotiling · bridges and tunnels · sound · level editor export · offline PWA · advanced accessibility | — |
 
 **MVP milestone = end of Stage 5.**
 
-**Tutorial levels (Stages 5–8)** — each one has a reference solution in `src/test/golden.test.ts` that must win it (≥ 2 stars, positive profit):
+**Tutorial levels (Stages 5–9)** — each one has a reference solution in `src/test/golden.test.ts` that must win it (≥ 2 stars, positive profit):
 
 | Level | Teaches | Reference result |
 |---|---|---|
@@ -1248,6 +1321,7 @@ Each stage ends with a **playable or verifiable demo**, its Definition of Done (
 | `level-002` Round Trip | Trains never reverse: a circuit serving two towns (passengers both ways) | ★★★ in 3:04, profit $505 |
 | `level-003` Dead End Port | Switches: a reversing loop at each dead end of a single line | ★★★ in 5:04, profit $510 |
 | `level-004` Two Lines | Several trains (`maxTrains: 3`) and diagonals: one train per job, a diagonal line that crosses the other one on a 45° crossing | ★★★ in 0:28, profit $346 |
+| `level-005` Signal Box | Signals: two trains share the lake circuit (only steam locomotives, `maxTrains: 2`); five signals keep them a block apart, and without them they crash. One train alone gets at most ★★ | ★★★ in 3:14, profit $612 |
 
 `level-004` was added after Stage 8 (2026-10-04), so the tutorials also cover Stages 6 and 8.
 
@@ -1473,10 +1547,13 @@ Feature: Playing on a phone
 | D10 | Palette and sprite size? (S7) | ENDESGA 32, native 20 × 20 sprites, generated from code (ADR-002). |
 | D12 | Missing junctions found after Stage 8 (2026-10-04) | Add left-hand switches, a 45° wye and a cardinal × diagonal crossing; a coverage test keeps the catalog complete (§4.4). |
 | D11 | Which diagonal pieces? (S8) | Only 45° turns: diagonal straight (straight at 45°), 45° curve, diagonal switch; no sharp corner-to-corner curves (§4.4). |
+| D13 | How do signals work? (S9, 2026-10-04) | A signal is its own track piece guarding one direction; plain block signals only, aspects derived from occupancy and never stored. Path signals go to the backlog (§4.10.1). |
+| D14 | Is revenue flat, or does it depend on distance or time? (was open Q1) | By distance, with a bonus for fast deliveries; scheduled for Stage 10. Until then, flat. |
+| D15 | Do trains have running costs? (was open Q2) | Yes: a cost per locomotive per minute while running; Stage 10. |
+| D16 | Passengers with origin and destination? (was open Q3) | Later (backlog), together with random demand from the seeded RNG. |
+| D17 | Can a stranded train be rescued? (was open Q4) | Yes: a rescue locomotive bought in the editor; Stage 10. |
 
 ### 15.2 Open
 
-1. **S5**: Is revenue a flat amount per unit, or does it depend on distance or delivery time? (MVP: flat.)
-2. **S5**: Do trains have running/maintenance costs over time? (MVP: no.)
-3. **S5**: Passengers: does every passenger station both supply and demand, with origin/destination pairs?
-4. Should a stranded train (out of fuel or blocked) ever be recoverable (rescue locomotive), or only scrapped?
+1. **S10**: Exact formulas for distance-based revenue, the speed bonus and running costs (to settle before Stage 10 starts).
+2. **S10**: How a rescue locomotive works: does it tow the stranded train to a station, or refuel it where it stands?

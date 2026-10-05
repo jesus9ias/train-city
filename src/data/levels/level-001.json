@@ -90,7 +90,16 @@
   "editorRules": {
     "allowTerrainEdit": false,
     "allowObjectEdit": true,
-    "allowedPieces": ["straight", "curve", "switch", "wye", "buffer", "station_track"],
+    "allowedPieces": [
+      "straight",
+      "curve",
+      "curve45",
+      "switch",
+      "switch_left",
+      "wye",
+      "buffer",
+      "station_track"
+    ],
     "allowedLocomotives": ["loco_steam"],
     "allowedWagons": ["wagon_hopper"],
     "maxTrains": 1

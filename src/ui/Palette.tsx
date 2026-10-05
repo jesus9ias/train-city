@@ -25,9 +25,10 @@ type Item = {
 };
 
 /** Track groups, in display order, derived from the piece data (spec.md §4.4). */
-const TRACK_GROUPS = ['Lines & curves', 'Switches & wyes', 'Crossings'] as const;
+const TRACK_GROUPS = ['Lines & curves', 'Switches & wyes', 'Crossings', 'Signals'] as const;
 
 function trackGroup(piece: TrackPieceDef): (typeof TRACK_GROUPS)[number] {
+  if (piece.signal !== undefined) return 'Signals';
   if (piece.stateful) return 'Switches & wyes';
   if (piece.routes.length > 1) return 'Crossings';
   return 'Lines & curves';

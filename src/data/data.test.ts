@@ -4,6 +4,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { rotationStep } from '../core/track/rotation';
 import {
   availableLevelFiles,
   loadAtlasManifest,
@@ -29,6 +30,20 @@ describe('bundled data', () => {
       expect(level.name).toBe(entry.name);
     }
   });
+
+  it.each(availableLevelFiles())(
+    'level %s lets diagonal lines be joined: a piece that turns 45° comes with the 45° curve',
+    async (id) => {
+      const allowed = (await loadLevel(id, catalogs)).editorRules.allowedPieces;
+      if (allowed === undefined) return; // everything is allowed
+      const diagonal = allowed.filter((p) => {
+        const piece = catalogs.pieces[p];
+        return piece !== undefined && rotationStep(piece) === 45;
+      });
+      if (diagonal.length > 0)
+        expect(allowed, `${diagonal.join(', ')} turn 45°`).toContain('curve45');
+    },
+  );
 
   it.each(availableLevelFiles())(
     'level %s is valid and its id matches its file name',

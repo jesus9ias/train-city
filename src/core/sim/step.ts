@@ -10,6 +10,7 @@ import { routeLength } from '../track/geometry';
 import { inBounds, stationAt, terrainAt, trackAt, type WorldState } from '../world/world';
 import { findCollisions } from './collisions';
 import { exitFor } from './routing';
+import { mustWaitAtSignal } from './signals';
 import type { CellPass, TrainState, TrainStatus } from './train';
 
 export { TICK_SECONDS };
@@ -56,7 +57,13 @@ function lookAhead(world: WorldState, ctx: RulesContext, head: CellPass): Ahead 
 }
 
 /** Mutable accumulators shared by all trains during one tick (applied in train order). */
-type TickShared = { run: RunState; ledger: Ledger; events: SimEvent[] };
+type TickShared = {
+  run: RunState;
+  ledger: Ledger;
+  events: SimEvent[];
+  /** Train positions so far this tick: already moved trains hold their new state (§4.10.1). */
+  trains: TrainState[];
+};
 
 function burnFuel(shared: TickShared, trainId: string, amount: number): void {
   if (amount <= 0) return;
@@ -136,6 +143,10 @@ function stepTrain(
     distance -= room;
     moved += room;
     progress = length;
+    if (mustWaitAtSignal(world, ctx.catalogs.pieces, shared.trains, train.id, head)) {
+      status = 'waiting';
+      break;
+    }
     const ahead = lookAhead(world, ctx, head);
     if (ahead.kind !== 'pass') {
       status = ahead.kind;
@@ -157,7 +168,7 @@ function stepTrain(
     progress,
     lastStation,
     fuel: train.fuel - burned,
-    speed: status === 'blocked' || status === 'derailed' ? 0 : speed,
+    speed: status === 'blocked' || status === 'derailed' || status === 'waiting' ? 0 : speed,
     status,
   };
 
@@ -247,8 +258,17 @@ function resolveCollisions(
 
 /** Advances the simulation by one fixed tick. Pure and deterministic (spec.md §4.8). */
 export function step(state: GameState, ctx: RulesContext): StepResult {
-  const shared: TickShared = { run: state.run, ledger: state.ledger, events: [] };
-  const moved = state.trains.map((train) => stepTrain(train, state, ctx, shared));
+  const shared: TickShared = {
+    run: state.run,
+    ledger: state.ledger,
+    events: [],
+    trains: [...state.trains],
+  };
+  const moved = state.trains.map((train, i) => {
+    const next = stepTrain(train, state, ctx, shared);
+    shared.trains[i] = next;
+    return next;
+  });
   const trains = resolveCollisions(state.trains, moved, shared);
   const run = produce(shared.run, state.world.stations, TICK_SECONDS);
   let next: GameState = {

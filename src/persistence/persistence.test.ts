@@ -297,16 +297,21 @@ describe('Feature: Export and import — Scenario: Migrate an old save', () => {
   });
 
   it('current saves need no migration', () => {
-    expect(migrate({ schemaVersion: 3 })).toEqual({ ok: true, value: { schemaVersion: 3 } });
+    expect(migrate({ schemaVersion: 4 })).toEqual({ ok: true, value: { schemaVersion: 4 } });
   });
 
-  it('a v1 save goes through every real migration (v1 → v2 → v3)', () => {
+  it('v3 → v4 only bumps the version (Stage 9: trains may wait at signals)', () => {
+    const v3 = { schemaVersion: 3, world: { trains: [{ id: 't1', status: 'running' }] } };
+    expect(migrate(v3)).toEqual({ ok: true, value: { ...v3, schemaVersion: 4 } });
+  });
+
+  it('a v1 save goes through every real migration (v1 → v2 → v3 → v4)', () => {
     const v1 = JSON.parse(FIXTURE) as RawSave;
     const result = migrate(v1);
     expect(result).toMatchObject({
       ok: true,
       value: {
-        schemaVersion: 3,
+        schemaVersion: 4,
         world: { trains: [] },
         editor: { nextTrainId: 1 },
         run: {
