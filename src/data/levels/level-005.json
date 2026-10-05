@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "id": "level-002",
-  "name": "Round Trip",
-  "description": "Trains never reverse: build a loop around the lake so passengers can travel both ways.",
+  "id": "level-005",
+  "name": "Signal Box",
+  "description": "Two trains share one circuit. Place signals so a train waits for the one ahead instead of running into it.",
   "map": {
     "widthPx": 1000,
     "heightPx": 1000,
@@ -54,7 +54,7 @@
           { "x": 8, "y": 22 }
         ],
         "supplies": [
-          { "cargo": "passengers", "ratePerMinute": 20, "capacity": 120, "initial": 40 }
+          { "cargo": "passengers", "ratePerMinute": 240, "capacity": 900, "initial": 600 }
         ],
         "demands": [{ "cargo": "passengers" }],
         "services": ["fuel"],
@@ -70,34 +70,45 @@
           { "x": 41, "y": 22 }
         ],
         "supplies": [
-          { "cargo": "passengers", "ratePerMinute": 20, "capacity": 120, "initial": 40 }
+          { "cargo": "passengers", "ratePerMinute": 240, "capacity": 900, "initial": 600 }
         ],
         "demands": [{ "cargo": "passengers" }],
         "dwellSeconds": 3,
-        "locked": true
+        "locked": true,
+        "services": ["fuel"]
       }
     ]
   },
   "editorRules": {
     "allowTerrainEdit": false,
     "allowObjectEdit": true,
-    "allowedPieces": ["straight", "curve", "curve45", "buffer", "station_track"],
-    "allowedLocomotives": ["loco_steam", "loco_diesel"],
+    "allowedPieces": [
+      "straight",
+      "curve",
+      "curve45",
+      "signal",
+      "switch",
+      "switch_left",
+      "wye",
+      "buffer",
+      "station_track"
+    ],
+    "allowedLocomotives": ["loco_steam"],
     "allowedWagons": ["wagon_pax"],
-    "maxTrains": 1
+    "maxTrains": 2
   },
   "economy": {
-    "initialMoney": 2500,
+    "initialMoney": 4000,
     "fuelPrice": 0.5,
     "refundRatio": 0.5,
-    "payOverrides": { "passengers": 16 }
+    "payOverrides": { "passengers": 2 }
   },
   "objectives": [
     {
       "id": "o1",
       "type": "deliver",
       "cargo": "passengers",
-      "amount": 80,
+      "amount": 1000,
       "to": "st_east",
       "from": "st_west"
     },
@@ -105,7 +116,7 @@
       "id": "o2",
       "type": "deliver",
       "cargo": "passengers",
-      "amount": 80,
+      "amount": 1000,
       "to": "st_west",
       "from": "st_east"
     }
@@ -113,10 +124,10 @@
   "constraints": { "timeLimitSeconds": 900 },
   "scoring": {
     "stars": [
-      { "stars": 3, "maxSeconds": 360, "maxFuel": 700, "maxBuildCost": 2200 },
-      { "stars": 2, "maxSeconds": 600, "maxFuel": 1100, "maxBuildCost": 2400 },
+      { "stars": 3, "maxSeconds": 240, "maxFuel": 1500, "maxBuildCost": 2800 },
+      { "stars": 2, "maxSeconds": 450, "maxFuel": 2200, "maxBuildCost": 3400 },
       { "stars": 1 }
     ]
   },
-  "seed": 2
+  "seed": 5
 }

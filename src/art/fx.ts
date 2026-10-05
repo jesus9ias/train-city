@@ -87,11 +87,31 @@ function switchMarker(): PixelCanvas {
   return c;
 }
 
-/** Effect frames of the `ui` atlas: `explosion_<n>`, `smoke_<n>`, `switch_marker`. */
+/** A lit signal lamp (3 × 3, drawn over the post's dark lamp). */
+function signalLamp(dark: 'wine' | 'green', lit: 'red' | 'lime'): PixelCanvas {
+  const c = new PixelCanvas(3, 3);
+  c.rect(0, 0, 3, 3, dark);
+  for (const [x, y] of [
+    [1, 0],
+    [0, 1],
+    [1, 1],
+    [2, 1],
+    [1, 2],
+  ] as const)
+    c.set(x, y, lit);
+  return c;
+}
+
+/**
+ * Effect frames of the `ui` atlas: `explosion_<n>`, `smoke_<n>`, `switch_marker`, and the signal
+ * lamps `signal_red` / `signal_green`.
+ */
 export function fxFrames(): Map<string, PixelCanvas> {
   const frames = new Map<string, PixelCanvas>();
   for (let i = 0; i < EXPLOSION_FRAMES; i++) frames.set(`explosion_${i}`, explosion(i));
   for (let i = 0; i < SMOKE_FRAMES; i++) frames.set(`smoke_${i}`, smoke(i));
   frames.set('switch_marker', switchMarker());
+  frames.set('signal_red', signalLamp('wine', 'red'));
+  frames.set('signal_green', signalLamp('green', 'lime'));
   return frames;
 }

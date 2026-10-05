@@ -3,7 +3,7 @@ import { cellSchema, idSchema, portSchema } from './common';
 import { stationSchema } from './level';
 
 export const SAVE_FORMAT = 'traincity-save';
-export const CURRENT_SAVE_VERSION = 3;
+export const CURRENT_SAVE_VERSION = 4;
 
 /** Fields every save version has; checked before migrating. */
 export const saveHeaderSchema = z.looseObject({
@@ -37,7 +37,15 @@ const trainSchema = z.strictObject({
   trail: z.array(cellPassSchema),
   speed: amount,
   running: z.boolean(),
-  status: z.enum(['stopped', 'running', 'loading', 'blocked', 'derailed', 'out_of_fuel']),
+  status: z.enum([
+    'stopped',
+    'running',
+    'loading',
+    'blocked',
+    'waiting',
+    'derailed',
+    'out_of_fuel',
+  ]),
   fuel: amount,
   autoRefuel: z.boolean(),
   purchaseValue: amount,
@@ -67,7 +75,7 @@ const outcomeSchema = z.discriminatedUnion('kind', [
  */
 export const saveSchema = z.strictObject({
   format: z.literal(SAVE_FORMAT),
-  schemaVersion: z.literal(3),
+  schemaVersion: z.literal(4),
   gameVersion: z.string(),
   savedAt: z.iso.datetime(),
   levelId: idSchema,

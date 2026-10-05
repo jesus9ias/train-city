@@ -20,9 +20,29 @@ const range = (from: number, to: number) =>
   Array.from({ length: to - from + 1 }, (_, i) => from + i);
 const row = (y: number, xs: number[]): Track[] => xs.map((x) => [x, y, 'straight', 90]);
 const column = (x: number, ys: number[]): Track[] => ys.map((y) => [x, y, 'straight', 0]);
+/** The clockwise circuit around the lake of level-002 and level-005 (stations at x=8 and 41). */
+const lakeLoop = (): Track[] => [
+  [8, 10, 'curve', 0],
+  [41, 10, 'curve', 90],
+  [41, 32, 'curve', 180],
+  [8, 32, 'curve', 270],
+  ...row(10, range(9, 40)),
+  ...row(32, range(9, 40)),
+  ...column(8, [...range(11, 19), ...range(23, 31)]),
+  ...column(41, [...range(11, 19), ...range(23, 31)]),
+];
 
 type Train = { cell: [number, number]; facing: Port; locomotive: string; wagons: string[] };
 type Solution = { tracks: Track[]; trains: Train[] };
+
+/** level-005: [x, y, rotation] of each signal, guarding the direction of travel. */
+const SIGNALS_005: readonly (readonly [number, number, number])[] = [
+  [8, 26, 0],
+  [8, 19, 0],
+  [25, 10, 90],
+  [41, 23, 180],
+  [25, 32, 270],
+];
 
 const SOLUTIONS: Record<string, Solution> = {
   // Mine (10,8–10) → south → east along y=38 → Power Plant (40–42,38).
@@ -39,16 +59,7 @@ const SOLUTIONS: Record<string, Solution> = {
   },
   // A clockwise loop around the lake through both towns.
   'level-002': {
-    tracks: [
-      [8, 10, 'curve', 0],
-      [41, 10, 'curve', 90],
-      [41, 32, 'curve', 180],
-      [8, 32, 'curve', 270],
-      ...row(10, range(9, 40)),
-      ...row(32, range(9, 40)),
-      ...column(8, [...range(11, 19), ...range(23, 31)]),
-      ...column(41, [...range(11, 19), ...range(23, 31)]),
-    ],
+    tracks: lakeLoop(),
     trains: [
       {
         cell: [8, 20],
@@ -116,12 +127,37 @@ const SOLUTIONS: Record<string, Solution> = {
       },
     ],
   },
+  // The lake circuit shared by two trains, one close behind the other. Five signals split it into
+  // five blocks: before and after the west station, after the east one, and halfway along the
+  // north and south sides.
+  'level-005': {
+    tracks: [
+      ...lakeLoop().map((track): Track => {
+        const [x, y] = track;
+        const signal = SIGNALS_005.find(([sx, sy]) => sx === x && sy === y);
+        return signal ? [x, y, 'signal', signal[2]] : track;
+      }),
+    ],
+    trains: [
+      {
+        cell: [8, 20],
+        facing: 'N',
+        locomotive: 'loco_steam',
+        wagons: ['wagon_pax', 'wagon_pax', 'wagon_pax', 'wagon_pax', 'wagon_pax'],
+      },
+      {
+        cell: [8, 29],
+        facing: 'N',
+        locomotive: 'loco_steam',
+        wagons: ['wagon_pax', 'wagon_pax', 'wagon_pax', 'wagon_pax', 'wagon_pax'],
+      },
+    ],
+  },
 };
 
-async function play(levelId: string): Promise<GameState> {
+async function play(levelId: string, solution = SOLUTIONS[levelId]): Promise<GameState> {
   const level = await loadLevel(levelId, testCatalogs);
   const ctx = rulesContext(level, testCatalogs);
-  const solution = SOLUTIONS[levelId];
   if (!solution) throw new Error(`no solution for ${levelId}`);
   const actions: EditorAction[] = [
     ...solution.tracks.map(([x, y, piece, rotation]): EditorAction => ({
@@ -165,6 +201,18 @@ describe('golden runs: every tutorial level can be won', () => {
     expect(done.trains).toHaveLength(SOLUTIONS[levelId]?.trains.length ?? 0);
     // A good solution should pay for itself: tutorials reward efficient play with profit.
     expect(outcome?.kind === 'completed' && outcome.score).toBeGreaterThan(0);
+  });
+
+  it('level-005 needs its signals: without them the trains crash', async () => {
+    const solution = SOLUTIONS['level-005'];
+    if (!solution) throw new Error('no solution for level-005');
+    const unsignalled = solution.tracks.map(([x, y, piece, rotation]): Track =>
+      piece === 'signal'
+        ? [x, y, 'straight', rotation % 180 === 0 ? 0 : 90]
+        : [x, y, piece, rotation],
+    );
+    const done = await play('level-005', { ...solution, tracks: unsignalled });
+    expect(done.trains.length).toBeLessThan(solution.trains.length);
   });
 
   it('runs are deterministic (same state hash every time)', async () => {

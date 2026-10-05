@@ -75,7 +75,7 @@ describe('Palette', () => {
     const view = () => <Palette stores={stores} session={ready(stores)} />;
     const { rerender } = render(view());
     const groups = screen.getAllByRole('heading', { level: 3 }).map((h) => h.textContent);
-    expect(groups).toEqual(['Lines & curves', 'Switches & wyes', 'Crossings']);
+    expect(groups).toEqual(['Lines & curves', 'Switches & wyes', 'Crossings', 'Signals']);
     const names = (group: string) =>
       within(screen.getByRole('region', { name: group }))
         .getAllByRole('button')
@@ -89,6 +89,7 @@ describe('Palette', () => {
       '45° wye',
     ]);
     expect(names('Crossings')).toEqual(['X crossing', '45° crossing']);
+    expect(names('Signals')).toEqual(['Signal']);
     expect(names('Lines & curves')).toContain('45° curve');
 
     expect(screen.queryByTestId('piece-description')).not.toBeInTheDocument();

@@ -11,6 +11,7 @@ import { networkReport } from '../../state/selectors';
 import type { AppStores } from '../../state/stores';
 import { CameraController } from '../camera/CameraController';
 import { ObjectLayer, TrackLayer } from '../layers/EntityLayers';
+import { SignalLayer } from '../layers/SignalLayer';
 import { GhostLayer } from '../layers/GhostLayer';
 import { NetworkOverlay } from '../layers/NetworkOverlay';
 import { atlasLookup, drawGrid, drawStations, flashCell } from '../layers/staticLayers';
@@ -36,6 +37,7 @@ export type WorldSceneData = {
 export class WorldScene extends Phaser.Scene {
   private accumulator = 0;
   private trains: TrainLayer | null = null;
+  private signals: SignalLayer | null = null;
 
   constructor(
     private readonly stores: AppStores,
@@ -68,6 +70,7 @@ export class WorldScene extends Phaser.Scene {
     });
     const objects = new ObjectLayer(this, catalogs, atlases);
     this.trains = new TrainLayer(this, catalogs, atlases);
+    this.signals = new SignalLayer(this, catalogs, atlases);
     const network = new NetworkOverlay(this);
     const ghost = new GhostLayer(this, catalogs, atlases, terrain);
     tracks.sync(world.tracks);
@@ -186,6 +189,7 @@ export class WorldScene extends Phaser.Scene {
       this.input.off('pointerup', onUp);
       this.input.off('pointerupoutside', onUp);
       this.trains = null;
+      this.signals = null;
     };
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, cleanup);
     this.events.once(Phaser.Scenes.Events.DESTROY, cleanup);
@@ -223,6 +227,7 @@ export class WorldScene extends Phaser.Scene {
 
     const current = readySession(this.stores) ?? session;
     const alpha = isSimulating(current.game) ? this.accumulator / TICK_MS : 0;
+    this.signals?.render(current.game.world, current.game.trains);
     this.trains.render(
       current.game.trains,
       current.game.world,

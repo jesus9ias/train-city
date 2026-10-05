@@ -176,3 +176,26 @@ export function routePoint(shape: RouteShape, t: number): UnitPoint {
     y: shape.center.y + Math.sin(angle) * shape.radius,
   };
 }
+
+/** Where a signal's lamp sits at rotation 0: right of the line, near the guarded exit (N). */
+const SIGNAL_LAMP: UnitPoint = { x: 0.85, y: 0.2 };
+/** Foot of the signal post at rotation 0. */
+const SIGNAL_FOOT: UnitPoint = { x: 0.85, y: 0.45 };
+
+function turnAroundCenter(point: UnitPoint, degrees: number): UnitPoint {
+  const a = (degrees * Math.PI) / 180;
+  const dx = point.x - CELL_CENTER.x;
+  const dy = point.y - CELL_CENTER.y;
+  return {
+    x: CELL_CENTER.x + dx * Math.cos(a) - dy * Math.sin(a),
+    y: CELL_CENTER.y + dx * Math.sin(a) + dy * Math.cos(a),
+  };
+}
+
+/** Lamp and post foot of a signal placed at `rotation` (clockwise degrees), in unit coordinates. */
+export function signalPost(rotation: number): { lamp: UnitPoint; foot: UnitPoint } {
+  return {
+    lamp: turnAroundCenter(SIGNAL_LAMP, rotation),
+    foot: turnAroundCenter(SIGNAL_FOOT, rotation),
+  };
+}
